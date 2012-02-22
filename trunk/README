@@ -1,0 +1,83 @@
+Oculus Readme - How to Run, How it works, Known Issues, and Parameters
+
+Installation
+
+  Read the file named 'INSTALL'
+
+How to Run
+
+  Type './oculus --help | less' to browse the run syntax and argument list.
+
+  Before running oculus, one should first build an index on the
+  database they intend to search against (using 'bwa index' or 'bowtie-build')
+
+How it works
+
+  Oculus will iterate through files of reads, and write to a temporary file
+  the list of 'functionally unique' reads.  The unique reads are then passed
+  into the aligner, which works as normal, and then using the list of reads
+  it has seen before, oculus will reconstruct the original output.  The end
+  result is that the aligner has to do less work, while still getting the
+  same output.
+
+  The concept of functional redundancy means removing reads that have the same
+  sequence.  In single end, this can also mean removing reads that have the
+  same reverse complemented sequence, or in paired end, removing pairs of reads
+  that have the same sequence but in a different order (at this point, 
+  necessarily forward-reverse / -> <-).  Since this can produce some inconsistency,
+  reverse orientation read removal is optional using --rc.  Basically - if the
+  reads should produce the same alignment, they are subject to being compressed.
+
+  A couple consequences of this approach are that quality scores are discarded,
+  as well as read names.  Read names could be preserved in a later version of
+  oculus, but discarding quality score is a necessary consequence of reducing
+  sequence redundancy.
+
+"Functional" Parameters
+
+  --bwa   : Use BWA instead of bowtie
+
+  --base4 : Oculus doesn't store input reads as plain text in memory - this would
+            take far too much space.  Instead, Oculus will compress each nucleotide
+            into either 2 or 3 bits.  Since 2 bits isn't sufficient to represent
+            the letter N, more space is needed for reads that contain more than 4
+            "letters".
+
+            This argument will tell Oculus it's ok to convert the letter N or n
+            into A in storing the compressed sequence.  The result of this is
+            that reads with Ns will compress together (ie, be removed) if they
+            coincide with reads with As in those positions.  This can affect
+            alignment results, because its up to the aligner to interpret Ns.
+            By default, Oculus will permit N's, by dynamically allocating 3 bits
+            per base for only sequences that actually contain N's (and for all
+            other reads, only allocating 2 bits per base).
+
+  --set :   Oculus stores redundant reads in an object called a hashmap.  Every
+            'unique' sequence (as described before) will have an entry in this
+            object, and its size affects lookup times.  In addition, this object
+            stores counts of the forward and reverse versions of that sequence
+            in the original input.  It's used in both the compression and
+            reconstruction steps.
+
+            An alternative to this setup is to have an object to contain the list
+            of sequences, and a separate object to contain the for/rev counts.
+            This can be faster or slower, or use more or less memory, depending
+            on the degree of the redundancy in the input data.  The general rule
+            of thumb is that low redundancy data should use a set, while highly
+            redundant data should use a map only.
+
+
+  --rc :    This tells Oculus to store together forward and reverse complement
+            sequence in single end, or opposite read pair orientations in paired
+            end.  It should be used if reverse complemented reads are expected
+            to align to the same location. (While this is generally true, seeding
+            can place an added importance on one end of a read, or one mate of
+            a pair of reads in the case of paired end alignment).  Some of this
+            directionality can be mitigated with parameters into the aligner, so
+            it's pretty flexible.
+
+
+  --ffq :   This forces Oculus to pass fastQ into the aligner - however only the
+            quality score of the first instance of a unique sequence will be
+            preserved, all later qualities will be discarded.  By default, Oculus
+            converts fastQ into fastA.
