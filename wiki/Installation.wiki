@@ -1,4 +1,4 @@
-===1. Install an Aligner===
+===1. Download and Install an Aligner===
 Oculus is currently configured to support BWA and Bowtie, which are available here:
 
   * http://bio-bwa.sourceforge.net
@@ -13,10 +13,12 @@ Oculus can compile with either standard library maps, or Google SparseHash maps,
 
 Oculus 0.1.1 was tested with google-sparsehash version 1.10.
 
-===2. Download Oculus===
-Oculus is available [http://code.google.com/p/oculus-bio/downloads/detail?name=oculus.tar.gz here]
+===3. Download and Unzip Oculus===
+1. Download Oculus [http://code.google.com/p/oculus-bio/downloads/detail?name=oculus.tar.gz here]
+2. unzip Oculus: `tar -xzf oculus.tar.gz`
+3. enter the Oculus directory: `cd oculus`
 
-===3. Configure Oculus===
+===4. Configure Oculus===
 Run configure.pl, and supply filepaths to
   * BWA and/or Bowtie's executables
   * Google Sparse Hash's `include` directory
@@ -27,7 +29,7 @@ perl configure.pl --bwa [bwa executable] --bowtie [bowtie executable] --g [Googl
 
 configure.pl will generate a makefile and a C header file, indicating paths to your installed libraries.
 
-===4. Run 'make'===
+===5. Run 'make'===
 
 {{{
 make
