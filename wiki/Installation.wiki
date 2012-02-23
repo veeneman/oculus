@@ -19,7 +19,7 @@ Oculus 0.1.1 was tested with `google-sparsehash` version 1.10.
   # enter the Oculus directory: `cd oculus`
 
 ===4. Configure Oculus===
-Run configure.pl, and supply filepaths to
+Run configure.pl, and supply *full* filepaths (i.e., starting with /) to
   * BWA and/or Bowtie's executables
   * Google Sparse Hash's `include` directory
 
