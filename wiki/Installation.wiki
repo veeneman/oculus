@@ -14,9 +14,9 @@ Oculus can compile with either standard library maps, or Google sparsehash maps,
 Oculus 0.1.1 was tested with `google-sparsehash` version 1.10.
 
 ===3. Download and Unzip Oculus===
-1. Download Oculus [http://code.google.com/p/oculus-bio/downloads/detail?name=oculus.tar.gz here]
-2. unzip Oculus: `tar -xzf oculus.tar.gz`
-3. enter the Oculus directory: `cd oculus`
+  # Download Oculus [http://code.google.com/p/oculus-bio/downloads/detail?name=oculus.tar.gz here]
+  # unzip Oculus: `tar -xzf oculus.tar.gz`
+  # enter the Oculus directory: `cd oculus`
 
 ===4. Configure Oculus===
 Run configure.pl, and supply filepaths to
