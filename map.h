@@ -28,6 +28,7 @@
 
 #include <ext/hash_map>
 #include <ext/hash_set>
+#include <stdint.h>
 
 using namespace std;
 using __gnu_cxx::hash;
