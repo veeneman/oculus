@@ -1,7 +1,7 @@
 #include <vector>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <sys/wait.h>
 using namespace std;
