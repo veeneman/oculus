@@ -51,7 +51,7 @@ void runBowtie(pid_t& pid,
   
   if(!fQ_mode)
     {
-      argv.push_back((char*)"-f"); //fasta
+      argv.push_back((char*)"-f"); //fasta - casting added
     }
   if(SE_mode)
     {
@@ -59,12 +59,12 @@ void runBowtie(pid_t& pid,
     }
   else //PE_mode. input files
     {
-      argv.push_back("-1");
+      argv.push_back((char*)"-1");
       argv.push_back(cfile1);
-      argv.push_back("-2");
+      argv.push_back((char*)"-2");
       argv.push_back(cfile2);
     }
-  argv.push_back("--sam"); //sam output
+  argv.push_back((char*)"--sam"); //sam output
   argv.push_back(alnfile);
   argv.push_back((char*)0); //null terminator
   
@@ -88,7 +88,7 @@ void runBWA(pid_t& pid,
   //This is largely similar to running bowtie, except I'm using arrays here to reduce code
   //BWA needs to align and pair reads separately, so multiple invocations are needed
   // -f = fasta
-  char* args1[100] = {BWA,"aln",database,cfile1,"-f",sai1};
+  char* args1[100] = {BWA,(char*)"aln",database,cfile1,(char*)"-f",sai1};
   int i = 6;
   char* argpointer = strtok(user_args1," ");
   while(argpointer != NULL)
@@ -104,7 +104,7 @@ void runBWA(pid_t& pid,
 
   if(SE_mode) //single end
     {
-      char* args2[100] = {BWA, "samse", database, sai1, cfile1, "-f", alnfile};
+      char* args2[100] = {BWA, (char*)"samse", database, sai1, cfile1, (char*)"-f", alnfile};
       i = 7;
       argpointer = strtok(user_args2," ");
       while(argpointer != NULL)
@@ -119,7 +119,7 @@ void runBWA(pid_t& pid,
     }
   else //paired end
     {
-      char* args2[100] = {BWA, "aln", database, cfile2, "-f", sai2};
+      char* args2[100] = {BWA, (char*)"aln", database, cfile2, (char*)"-f", sai2};
       i = 6;
       argpointer = strtok(user_args2," ");
       while(argpointer != NULL)
@@ -133,7 +133,7 @@ void runBWA(pid_t& pid,
       runThis(pid,args2);
       waitpid(pid,NULL,0);
 
-      char* args3[100] = {BWA, "sampe", database, sai1, sai2, cfile1, cfile2, "-f", alnfile};
+      char* args3[100] = {BWA, (char*)"sampe", database, sai1, sai2, cfile1, cfile2, (char*)"-f", alnfile};
       i = 9;
       argpointer = strtok(user_args3," ");
       while(argpointer != NULL)
