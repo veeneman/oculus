@@ -94,14 +94,14 @@ print MAKEFILE
 # brendan veeneman 3/2011
 
 CC= g++
-OPTS= -Wall -Wno-deprecated
+OPTS= -Wall
 GOOG= $gsh
 OBJS= usage.o parseArgs.o runAligner.o compressInput.o reconstruct.o cseq.o reverseComplement.o
 
 all:oculus
 
 oculus:oculus.cpp oculus.h map.h compile_options.h \$(OBJS)
-	\$(CC) \$(OPTS) \$(GOOG) oculus.cpp \$(OBJS) -o oculus
+	\$(CC) \$(OPTS) -Wno-deprecated \$(GOOG) oculus.cpp \$(OBJS) -o oculus
 
 runAligner.o:runAligner.cpp runAligner.h compile_options.h
 	\$(CC) \$(OPTS) -c runAligner.cpp
@@ -110,10 +110,10 @@ parseArgs.o:parseArgs.cpp parseArgs.h compile_options.h
 	\$(CC) \$(OPTS) -c parseArgs.cpp
 
 compressInput.o:compressInput.cpp compress.h map.h compile_options.h cseq.o reverseComplement.o
-	\$(CC) \$(OPTS) \$(GOOG) -c compressInput.cpp
+	\$(CC) \$(OPTS) -Wno-deprecated \$(GOOG) -c compressInput.cpp
 
 reconstruct.o:reconstruct.cpp compress.h map.h compile_options.h cseq.o reverseComplement.o
-	\$(CC) \$(OPTS) \$(GOOG) -c reconstruct.cpp
+	\$(CC) \$(OPTS) -Wno-deprecated \$(GOOG) -c reconstruct.cpp
 
 reverseComplement.o:reverseComplement.cpp
 	\$(CC) \$(OPTS) -c reverseComplement.cpp
