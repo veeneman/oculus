@@ -160,11 +160,11 @@ int main(int argc, char** argv)
 
   if(bowtie_mode)
     {
-      runBowtie(pid,BOWTIE,database,compressedfp_1,compressedfp_2,alignments,SE_mode,fQ_mode, aligner_args);
+      runBowtie(pid,(char*)BOWTIE,database,compressedfp_1,compressedfp_2,alignments,SE_mode,fQ_mode, aligner_args);
     }
   else
     {
-      runBWA(pid,BWA,database,
+      runBWA(pid,(char*)BWA,database,
 	     compressedfp_1,compressedfp_2,sai_1,sai_2,alignments,
 	     SE_mode,fQ_mode,
 	     aligner_args, aligner_args2, aligner_args3);
