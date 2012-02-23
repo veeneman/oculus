@@ -13,11 +13,22 @@ Oculus can compile with either standard library maps, or Google SparseHash maps,
 
 Oculus 0.1.1 was tested with google-sparsehash version 1.10.
 
+===2. Download Oculus===
+Oculus is available [http://code.google.com/p/oculus-bio/downloads/detail?name=oculus.tar.gz here]
+
 ===3. Configure Oculus===
 Run configure.pl, and supply filepaths to
   * BWA and/or Bowtie's executables
   * Google Sparse Hash's `include` directory
 
+{{{
+perl configure.pl --bwa [bwa executable] --bowtie [bowtie executable] --g [Google Sparse Hash's include directory]
+}}}
+
 configure.pl will generate a makefile and a C header file, indicating paths to your installed libraries.
 
 ===4. Run 'make'===
+
+{{{
+make
+}}}
