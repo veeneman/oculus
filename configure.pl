@@ -94,7 +94,7 @@ print MAKEFILE
 # brendan veeneman 3/2011
 
 CC= g++
-OPTS= -Wall
+OPTS= -Wall -Wno-deprecated
 GOOG= $gsh
 OBJS= usage.o parseArgs.o runAligner.o compressInput.o reconstruct.o cseq.o reverseComplement.o
 
