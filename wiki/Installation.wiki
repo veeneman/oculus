@@ -1,25 +1,23 @@
-  #1 Download and Install Bowtie or BWA.
+===1. Install an Aligner===
+Oculus is currently configured to support BWA and Bowtie, which are available here:
 
-        http://bio-bwa.sourceforge.net
-        http://bowtie-bio.sourceforge.net
+  * http://bio-bwa.sourceforge.net
+  * http://bowtie-bio.sourceforge.net
 
-   Oculus 0.1.0 was tested with bowtie version 0.12.7,
-   and BWA version 0.5.9-r16.
+Oculus 0.1.1 was tested with bowtie version 0.12.7, and BWA version 0.5.9-r16.
 
-  #2 Download and Install Google-Sparehash
-   (this is technically optional, but it performs
-    significantly better than the C libary hash code)
+===2. Download and Install Google SpareHash (Optional)===
+Oculus can compile with either standard library maps, or Google SparseHash maps, which are faster and use significantly less memory.
 
-        http://code.google.com/p/google-sparsehash
+  * http://code.google.com/p/google-sparsehash
 
-   Oculus 0.1.0 was tested with google-sparsehash version 1.10.
+Oculus 0.1.1 was tested with google-sparsehash version 1.10.
 
-  #3 Run configure.pl, and supply
-   - filepaths for BWA and/or Bowtie
-   - a filepath for google sparse hash's "include" directory
+===3. Configure Oculus===
+Run configure.pl, and supply filepaths to
+  * BWA and/or Bowtie's executables
+  * Google Sparse Hash's `include` directory
 
-   configure.pl will generate a makefile and a C
-   header file, indicating paths to your installed
-   libraries.
+configure.pl will generate a makefile and a C header file, indicating paths to your installed libraries.
 
-  #4 Run 'make'.
+===4. Run 'make'===
