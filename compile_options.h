@@ -1,5 +1,5 @@
 #define BOWTIE ""
-#define BWA    "fff"
+#define BWA    ""
 
 //maximum length of filenames (including path, and suffices)
 #define MAX_FILENAME_LENGTH 512
