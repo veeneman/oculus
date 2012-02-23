@@ -1,13 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include <map>
 #include <sstream>
+#include <vector>
 #include <sys/wait.h>
 #include <sys/time.h>
-#include <vector>
 #include "map.h"
 #include "compile_options.h"
 
