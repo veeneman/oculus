@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstring>
 #include "map.h"
 #include "compile_options.h"
 using namespace std;
