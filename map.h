@@ -77,7 +77,7 @@ namespace __gnu_cxx
       
       // Handle the last few bytes of the input array
       
-      switch(len)
+      switch(len) //XXX - this looks suspiciously buggy
 	{
 	case 3: h ^= key[2] << 16;
 	case 2: h ^= key[1] << 8;

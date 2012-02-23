@@ -2,7 +2,7 @@
 
 void usage(int ret_code)
 {
-  _IO_FILE* handle;
+  FILE* handle;
   (ret_code == 0) ? handle = stdout : handle = stderr;
 
   fprintf(handle,

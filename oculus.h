@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <map>
 #include <sstream>
-#include <wait.h>
+#include <sys/wait.h>
 #include <sys/time.h>
 #include <vector>
 #include "map.h"
