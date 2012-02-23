@@ -29,6 +29,8 @@ perl configure.pl --bwa [bwa executable] --bowtie [bowtie executable] --g [Googl
 
 configure.pl will generate a makefile and a C header file, indicating paths to your installed libraries.
 
+perl is available [http://www.perl.org/get.html here]
+
 ===5. Run 'make'===
 
 {{{
