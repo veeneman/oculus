@@ -1,4 +1,4 @@
-  #Download and Install Bowtie or BWA.
+  #1 Download and Install Bowtie or BWA.
 
         http://bio-bwa.sourceforge.net
         http://bowtie-bio.sourceforge.net
@@ -6,7 +6,7 @@
    Oculus 0.1.0 was tested with bowtie version 0.12.7,
    and BWA version 0.5.9-r16.
 
-  #Download and Install Google-Sparehash
+  #2 Download and Install Google-Sparehash
    (this is technically optional, but it performs
     significantly better than the C libary hash code)
 
@@ -14,7 +14,7 @@
 
    Oculus 0.1.0 was tested with google-sparsehash version 1.10.
 
-  #Run configure.pl, and supply
+  #3 Run configure.pl, and supply
    - filepaths for BWA and/or Bowtie
    - a filepath for google sparse hash's "include" directory
 
@@ -22,4 +22,4 @@
    header file, indicating paths to your installed
    libraries.
 
-  #Run 'make'.
+  #4 Run 'make'.
