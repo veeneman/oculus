@@ -1,5 +1,5 @@
 #include <vector>
-#include <wait.h>
+#include <sys/wait.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
