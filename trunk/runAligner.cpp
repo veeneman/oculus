@@ -51,7 +51,7 @@ void runBowtie(pid_t& pid,
   
   if(!fQ_mode)
     {
-      argv.push_back("-f"); //fasta
+      argv.push_back((char*)"-f"); //fasta
     }
   if(SE_mode)
     {
