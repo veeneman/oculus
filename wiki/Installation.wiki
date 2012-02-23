@@ -1,5 +1,3 @@
-#summary One-sentence summary of this page.
-
   #Download and Install Bowtie or BWA.
 
         http://bio-bwa.sourceforge.net
