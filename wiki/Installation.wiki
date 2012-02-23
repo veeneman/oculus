@@ -6,8 +6,8 @@ Oculus is currently configured to support BWA and Bowtie, which are available he
 
 Oculus 0.1.1 was tested with bowtie version 0.12.7, and BWA version 0.5.9-`r16`.
 
-===2. Download and Install `Google SparseHash` (Optional)===
-Oculus can compile with either standard library maps, or Google SparseHash maps, which are faster and use significantly less memory.
+===2. Download and Install Google sparsehash (Optional)===
+Oculus can compile with either standard library maps, or Google sparsehash maps, which are faster and use significantly less memory.
 
   * http://code.google.com/p/google-sparsehash
 
