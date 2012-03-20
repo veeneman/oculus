@@ -23,7 +23,7 @@ Alternatively, you can type `"svn checkout https://oculus-bio.googlecode.com/svn
 ===4. Configure Oculus===
 Run configure.pl, and supply *full* filepaths (i.e., starting with /) to
   * BWA and/or Bowtie's executables
-  * Google Sparse Hash's `include` directory
+  * Google Sparse Hash's `include` directory (in 2.0.2, this is instead [sparsehash home]/src)
 
 {{{
 perl configure.pl --bwa [bwa executable] --bowtie [bowtie executable] --g [Google Sparse Hash's include directory]
