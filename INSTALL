@@ -19,7 +19,7 @@ Oculus Installation How-To
 3) Run configure.pl, and supply
    - filepaths for BWA and/or Bowtie
    - a filepath for google sparse hash's "include" directory
-     (nb - in version 2.0.2 this is labeled as src)
+     (nb - in version 2.0.2 this is [sparsehash home]/src)
 
    configure.pl will generate a makefile and a C
    header file, indicating paths to your installed
