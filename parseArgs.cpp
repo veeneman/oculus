@@ -12,8 +12,9 @@ void parseArgs(int argc, char** argv,
 	       char* aligner_args, char* aligner_args2, char* aligner_args3,
 	       bool& SE, bool& fQ,
 	       bool& base4, bool& silent,
-	       bool& set_mode, bool& bowtie_mode,
-	       bool& RC_mode, bool& force_fastq_mode)
+	       bool& set_mode, int& aligner_mode,
+	       bool& RC_mode, bool& force_fastq_mode, bool& restore_qual,
+	       bool& gzip_cfiles, int& compress_mode)
 {
   database[0] = input1[0] = input2[0] = outputprefix[0] = 0;
 
@@ -90,12 +91,32 @@ void parseArgs(int argc, char** argv,
 	}
       else if(strncmp(argv[i],"--bwa",6) == 0)
 	{
-	  bowtie_mode = false;
+	  aligner_mode = 1;
+	}
+      else if(strncmp(argv[i],"--custom",9) == 0)
+	{
+	  aligner_mode = 2;
 	}
       else if(strncmp(argv[i],"--ffq",6) == 0)
 	{
 	  force_fastq_mode = true;
 	}
+      else if(strncmp(argv[i],"--gzip",7) == 0)
+    {
+      gzip_cfiles = true;
+    }
+      else if(strncmp(argv[i],"--gz_input",11) == 0)
+    {
+      compress_mode = 1;
+    }
+      else if(strncmp(argv[i],"--bz_input",11) == 0)
+    {
+      compress_mode = 2;
+    }
+      else if(strncmp(argv[i],"--restore_qual",15) == 0)
+    {
+      restore_qual = true;
+    }
       else if(strncmp(argv[i],"-d",3) == 0)
 	{
 	  if(i == (argc - 1) || argv[i+1][0] == '-')
@@ -179,7 +200,11 @@ void parseArgs(int argc, char** argv,
     {
       strncat(outputprefix,"output",7); //default output path, creatively named "output"
     }
-  
+  if(set_mode && restore_qual)
+  {
+    cerr << "Error: sets and quality retrieval are incompatible.\n";
+    exit(1);
+  }
 
   if(SE)
     {

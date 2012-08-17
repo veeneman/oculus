@@ -77,6 +77,48 @@ void runBowtie(pid_t& pid,
   runThis(pid,args);
 }
 
+void runCustom(pid_t& pid,
+	       char* custom_string, char* database,
+	       char* cfile1, char* cfile2,
+	       char* alnfile,
+	       bool SE_mode, bool fQ_mode,
+	       char* arguments)
+{
+  //command to execute, args must be separate
+  // I used vectors in these functions for convenience
+  vector<char*> argv;
+
+  char* argpointer = strtok(custom_string," ");
+  while(argpointer != NULL)
+    {
+      if(strncmp(argpointer,"@d",3) == 0) {      argv.push_back(database); }
+      else if(strncmp(argpointer,"@1",3) == 0) { argv.push_back(cfile1);   }
+      else if(strncmp(argpointer,"@2",3) == 0) { argv.push_back(cfile2);   }
+      else if(strncmp(argpointer,"@o",3) == 0) { argv.push_back(alnfile);  }
+      else { argv.push_back(argpointer); }
+      argpointer = strtok(NULL," ");
+    }
+
+  //add the runtime user-specified arguments
+  argpointer = strtok(arguments," ");
+  while(argpointer != NULL)
+    {
+      argv.push_back(argpointer);
+      argpointer = strtok(NULL," ");
+    }
+
+  argv.push_back((char*)0); //null terminator
+
+  char *args[256];
+  int i;
+  for(i=0;i < (signed int)argv.size();i++)
+  {
+    args[i] = argv[i];
+    if(args[i] != NULL) { cout << args[i] << " "; } else { cout << "\n..."; }
+  }
+  runThis(pid,args);
+}
+
 void runBWA(pid_t& pid,
 	    char* BWA, char* database,
 	    char* cfile1, char* cfile2,

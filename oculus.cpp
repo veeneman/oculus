@@ -21,12 +21,15 @@ int main(int argc, char** argv)
   //
   bool SE_mode;
   bool fQ_mode;
-  bool bowtie_mode      = true;
+  int  aligner_mode     = 0; // 0 - bwt, 1 - bwa, 2 - custom
+  int  compress_mode    = 0; // 0 - none, 1 - gzip, 2 - bzip2
+  bool gzip_cfiles      = false;
   bool silent_mode      = false;
   bool base4_mode       = false;
   bool set_mode         = false;
   bool RC_mode          = false;
   bool force_fastq_mode = false;
+  bool restore_qual     = false;
   SET single_set;
   MAP multi_map;
   int total_lines = 0;
@@ -49,6 +52,7 @@ int main(int argc, char** argv)
   char     aligner_args[MAX_ARG_LEN];
   char     aligner_args2[MAX_ARG_LEN];
   char     aligner_args3[MAX_ARG_LEN];
+  char     custom_string[MAX_FILENAME_LENGTH];
   //blank them
   compressedfp_1[0] = 0;
   compressedfp_2[0] = 0;
@@ -56,6 +60,10 @@ int main(int argc, char** argv)
   sai_2[0] = 0;
   alignments[0] = 0;
   alignments_recon[0] = 0;
+  custom_string[0] = 0;
+  aligner_args[0] = 0;
+  aligner_args2[0] = 0;
+  aligner_args3[0] = 0;
   
   //
   // Parse Arguments
@@ -66,8 +74,9 @@ int main(int argc, char** argv)
 	    aligner_args,aligner_args2,aligner_args3,
 	    SE_mode,fQ_mode,
 	    base4_mode,silent_mode,
-	    set_mode,bowtie_mode,
-	    RC_mode, force_fastq_mode);
+	    set_mode,aligner_mode,
+	    RC_mode, force_fastq_mode, restore_qual,
+	    gzip_cfiles, compress_mode);
 
   //generate output file paths based on user-specified output prefix
   strncat(strncat(compressedfp_1  ,outputprefix,MAX_FILENAME_LENGTH - 5),".cf1",5);
@@ -88,7 +97,9 @@ int main(int argc, char** argv)
       base4_mode ? cout << "  Forcing 2 bit nucleotides\n" : cout << "";
       if(force_fastq_mode){ cout << "  Forcing fastQ intermediate file\n"; }
       if(RC_mode){ cout << "  Storing reverse complements together\n"; }
-      bowtie_mode ? cout << "Aligner:\n  Bowtie\n" : cout << "Aligner:\n  BWA\n";
+      if(aligner_mode == 0){      cout << "Aligner:\n  Bowtie\n"; }
+      else if(aligner_mode == 1){ cout << "Aligner:\n  BWA\n";    }
+      else{                       cout << "Aligner:\n  Custom\n"; }
       
       //
       // Print the type of map that has been compiled in.  Uses compiler flags
@@ -148,7 +159,9 @@ int main(int argc, char** argv)
   if(!silent_mode)
     {
       gettimeofday(&times[3],NULL);
-      bowtie_mode ? cout << "done.\nRunning Bowtie...\n" : cout << "done.\nRunning BWA...\n";
+      if(aligner_mode == 0){      cout << "done.\nRunning Bowtie...\n"; }
+      else if(aligner_mode == 1){ cout << "done.\nRunning BWA...\n";    }
+      else{                       cout << "done.\nRunning this:\n"; }
       cout.flush();
     }
 
@@ -158,17 +171,27 @@ int main(int argc, char** argv)
   pid_t pid;
   int exit_status;
 
-  if(bowtie_mode)
+  if(aligner_mode == 0)
     {
-      runBowtie(pid,(char*)BOWTIE,database,compressedfp_1,compressedfp_2,alignments,SE_mode,fQ_mode, aligner_args);
+      runBowtie(pid,(char*)BOWTIE,database,compressedfp_1,
+              compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
+    }
+  else if(aligner_mode == 1)
+    {
+      runBWA(pid,(char*)BWA,database,
+         compressedfp_1,compressedfp_2,sai_1,sai_2,alignments,
+         SE_mode,fQ_mode,
+         aligner_args, aligner_args2, aligner_args3);
     }
   else
     {
-      runBWA(pid,(char*)BWA,database,
-	     compressedfp_1,compressedfp_2,sai_1,sai_2,alignments,
-	     SE_mode,fQ_mode,
-	     aligner_args, aligner_args2, aligner_args3);
+	  SE_mode ? strncpy(custom_string,(char*)CUSTOM_ALIGNER_SE,MAX_FILENAME_LENGTH) :
+	            strncpy(custom_string,(char*)CUSTOM_ALIGNER_PE,MAX_FILENAME_LENGTH);
+	  runCustom(pid,custom_string,database,compressedfp_1,
+	          compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
     }
+
+
   cout.flush();
   waitpid(pid,&exit_status,0);
   if(!WIFEXITED(exit_status) || WEXITSTATUS(exit_status) != 0)
