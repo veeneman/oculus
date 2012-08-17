@@ -11,28 +11,28 @@ void runThis(pid_t& pid, char** args)
 {
   pid = fork();
   if(pid==0)
-    //this is the child process
-    {
-      //turn this program into that command
-      execv(args[0],args);
-      
-      //should never reach this line
-      fprintf(stderr,"Error:Execution failed.\n");
-      exit(1);
-    }
+  //this is the child process
+  {
+    //turn this program into that command
+    execv(args[0],args);
+
+    //should never reach this line
+    fprintf(stderr,"Error:Execution failed.\n");
+    exit(1);
+  }
   else if(pid < 0)
-    {
-      cerr << "Error:Execution failed.\n";
-      exit(1);
-    }
+  {
+    cerr << "Error:Execution failed.\n";
+    exit(1);
+  }
 }
 
 void runBowtie(pid_t& pid,
-	       char* bowtie, char* database,
-	       char* cfile1, char* cfile2,
-	       char* alnfile,
-	       bool SE_mode, bool fQ_mode,
-	       char* arguments)
+               char* bowtie, char* database,
+               char* cfile1, char* cfile2,
+               char* alnfile,
+               bool SE_mode, bool fQ_mode,
+               char* arguments)
 {
   //command to execute, args must be separate
   // I used vectors in these functions for convenience
@@ -44,26 +44,26 @@ void runBowtie(pid_t& pid,
   //add the user-specified arguments
   char* argpointer = strtok(arguments," ");
   while(argpointer != NULL)
-    {
-      argv.push_back(argpointer);
-      argpointer = strtok(NULL," ");
-    }
+  {
+    argv.push_back(argpointer);
+    argpointer = strtok(NULL," ");
+  }
   
   if(!fQ_mode)
-    {
-      argv.push_back((char*)"-f"); //fasta - casting added
-    }
+  {
+    argv.push_back((char*)"-f"); //fasta - casting added
+  }
   if(SE_mode)
-    {
-      argv.push_back(cfile1); //input file, don't need -1
-    }
+  {
+    argv.push_back(cfile1); //input file, don't need -1
+  }
   else //PE_mode. input files
-    {
-      argv.push_back((char*)"-1");
-      argv.push_back(cfile1);
-      argv.push_back((char*)"-2");
-      argv.push_back(cfile2);
-    }
+  {
+    argv.push_back((char*)"-1");
+    argv.push_back(cfile1);
+    argv.push_back((char*)"-2");
+    argv.push_back(cfile2);
+  }
   argv.push_back((char*)"--sam"); //sam output
   argv.push_back(alnfile);
   argv.push_back((char*)0); //null terminator
@@ -78,11 +78,11 @@ void runBowtie(pid_t& pid,
 }
 
 void runCustom(pid_t& pid,
-	       char* custom_string, char* database,
-	       char* cfile1, char* cfile2,
-	       char* alnfile,
-	       bool SE_mode, bool fQ_mode,
-	       char* arguments)
+               char* custom_string, char* database,
+               char* cfile1, char* cfile2,
+               char* alnfile,
+               bool SE_mode, bool fQ_mode,
+               char* arguments)
 {
   //command to execute, args must be separate
   // I used vectors in these functions for convenience
@@ -90,22 +90,22 @@ void runCustom(pid_t& pid,
 
   char* argpointer = strtok(custom_string," ");
   while(argpointer != NULL)
-    {
-      if(strncmp(argpointer,"@d",3) == 0) {      argv.push_back(database); }
-      else if(strncmp(argpointer,"@1",3) == 0) { argv.push_back(cfile1);   }
-      else if(strncmp(argpointer,"@2",3) == 0) { argv.push_back(cfile2);   }
-      else if(strncmp(argpointer,"@o",3) == 0) { argv.push_back(alnfile);  }
-      else { argv.push_back(argpointer); }
-      argpointer = strtok(NULL," ");
-    }
+  {
+    if(strncmp(argpointer,"@d",3) == 0) {      argv.push_back(database); }
+    else if(strncmp(argpointer,"@1",3) == 0) { argv.push_back(cfile1);   }
+    else if(strncmp(argpointer,"@2",3) == 0) { argv.push_back(cfile2);   }
+    else if(strncmp(argpointer,"@o",3) == 0) { argv.push_back(alnfile);  }
+    else { argv.push_back(argpointer); }
+    argpointer = strtok(NULL," ");
+  }
 
   //add the runtime user-specified arguments
   argpointer = strtok(arguments," ");
   while(argpointer != NULL)
-    {
-      argv.push_back(argpointer);
-      argpointer = strtok(NULL," ");
-    }
+  {
+    argv.push_back(argpointer);
+    argpointer = strtok(NULL," ");
+  }
 
   argv.push_back((char*)0); //null terminator
 
@@ -120,12 +120,12 @@ void runCustom(pid_t& pid,
 }
 
 void runBWA(pid_t& pid,
-	    char* BWA, char* database,
-	    char* cfile1, char* cfile2,
-	    char* sai1, char* sai2,
-	    char* alnfile,
-	    bool SE_mode, bool fQ_mode,
-	    char* user_args1, char* user_args2, char* user_args3)
+            char* BWA, char* database,
+            char* cfile1, char* cfile2,
+            char* sai1, char* sai2,
+            char* alnfile,
+            bool SE_mode, bool fQ_mode,
+            char* user_args1, char* user_args2, char* user_args3)
 {
   //This is largely similar to running bowtie, except I'm using arrays here to reduce code
   //BWA needs to align and pair reads separately, so multiple invocations are needed
@@ -134,58 +134,58 @@ void runBWA(pid_t& pid,
   int i = 6;
   char* argpointer = strtok(user_args1," ");
   while(argpointer != NULL)
-    {
-      args1[i] = argpointer;
-      argpointer = strtok(NULL," ");
-      i++;
-    }
+  {
+    args1[i] = argpointer;
+    argpointer = strtok(NULL," ");
+    i++;
+  }
   args1[i] = (char*)0;
   
   runThis(pid,args1);
   waitpid(pid,NULL,0);
 
   if(SE_mode) //single end
+  {
+    char* args2[100] = {BWA, (char*)"samse", database, sai1, cfile1, (char*)"-f", alnfile};
+    i = 7;
+    argpointer = strtok(user_args2," ");
+    while(argpointer != NULL)
     {
-      char* args2[100] = {BWA, (char*)"samse", database, sai1, cfile1, (char*)"-f", alnfile};
-      i = 7;
-      argpointer = strtok(user_args2," ");
-      while(argpointer != NULL)
-	{
-	  args2[i] = argpointer;
-	  argpointer = strtok(NULL," ");
-	  i++;
-	}
-      args2[i] = (char*)0;
-	
-      runThis(pid,args2);
+      args2[i] = argpointer;
+      argpointer = strtok(NULL," ");
+      i++;
     }
+    args2[i] = (char*)0;
+
+    runThis(pid,args2);
+  }
   else //paired end
+  {
+    char* args2[100] = {BWA, (char*)"aln", database, cfile2, (char*)"-f", sai2};
+    i = 6;
+    argpointer = strtok(user_args2," ");
+    while(argpointer != NULL)
     {
-      char* args2[100] = {BWA, (char*)"aln", database, cfile2, (char*)"-f", sai2};
-      i = 6;
-      argpointer = strtok(user_args2," ");
-      while(argpointer != NULL)
-	{
-	  args2[i] = argpointer;
-	  argpointer = strtok(NULL," ");
-	  i++;
-	}
-      args2[i] = (char*)0;
-
-      runThis(pid,args2);
-      waitpid(pid,NULL,0);
-
-      char* args3[100] = {BWA, (char*)"sampe", database, sai1, sai2, cfile1, cfile2, (char*)"-f", alnfile};
-      i = 9;
-      argpointer = strtok(user_args3," ");
-      while(argpointer != NULL)
-	{
-	  args3[i] = argpointer;
-	  argpointer = strtok(NULL," ");
-	  i++;
-	}
-      args3[i] = (char*)0;
-      
-      runThis(pid,args3);
+      args2[i] = argpointer;
+      argpointer = strtok(NULL," ");
+      i++;
     }
+    args2[i] = (char*)0;
+
+    runThis(pid,args2);
+    waitpid(pid,NULL,0);
+
+    char* args3[100] = {BWA, (char*)"sampe", database, sai1, sai2, cfile1, cfile2, (char*)"-f", alnfile};
+    i = 9;
+    argpointer = strtok(user_args3," ");
+    while(argpointer != NULL)
+    {
+      args3[i] = argpointer;
+      argpointer = strtok(NULL," ");
+      i++;
+    }
+    args3[i] = (char*)0;
+
+    runThis(pid,args3);
+  }
 }

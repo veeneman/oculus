@@ -30,9 +30,9 @@ static char reverse_char[] = {
 void reverseComplement(char* source, char* dest, int length) //XXX shouldn't be reverse order, its stupid
 {
   for(int i = length - 1; i > -1; i--)
-    {
-      dest[length - i - 1] = reverse_char[(short int)source[i]];
-    }
+  {
+    dest[length - i - 1] = reverse_char[(short int)source[i]];
+  }
   dest[length] = 0;
 }
 
@@ -43,38 +43,38 @@ void oneWayRC(char* source, char* dest, int length, bool& reversed)
   int halfway = (int)length / 2; //rounds down
 
   for(i = 0; i < halfway; i++)
+  {
+    dest[i] = reverse_char[(short int)source[length - i - 1]];
+    dest[length - i - 1] = reverse_char[(short int)source[i]];
+
+    if(source[i] < dest[i])
+    //source char is lexicographically smaller than the RC char, quitting
     {
-      dest[i] = reverse_char[(short int)source[length - i - 1]];
-      dest[length - i - 1] = reverse_char[(short int)source[i]];
-      
-      if(source[i] < dest[i])
-	//source char is lexicographically smaller than the RC char, quitting
-	{
-	  return;
-	}
-      else if(source[i] > dest[i])
-	//source char > RC char, so we do want to reverse.  Breaks out and enters loop without checking
-	{
-	  reversed = true;
-	  i++;
-	  break;
-	}
-      //else - so far we don't know which is smaller.  continue.
-      //note that if it successfully converts the whole sequence in this loop it was palindromic,
-      // and by default this returns that it wasn't necessary to RC it.
+      return;
     }
+    else if(source[i] > dest[i])
+    //source char > RC char, so we do want to reverse.  Breaks out and enters loop without checking
+    {
+      reversed = true;
+      i++;
+      break;
+    }
+    //else - so far we don't know which is smaller.  continue.
+    //note that if it successfully converts the whole sequence in this loop it was palindromic,
+    // and by default this returns that it wasn't necessary to RC it.
+  }
 
   for( ; i < halfway; i++)
-    //this is exactly the same as the last loop, only it checks nothing.  time saving feature
-    {
-      dest[i] = reverse_char[(short int)source[length - i - 1]];
-      dest[length - i - 1] = reverse_char[(short int)source[i]];
-    }
+  //this is exactly the same as the last loop, only it checks nothing.  time saving feature
+  {
+    dest[i] = reverse_char[(short int)source[length - i - 1]];
+    dest[length - i - 1] = reverse_char[(short int)source[i]];
+  }
 
   if(length % 2 == 1) // input was odd length
-    {
-      dest[halfway] = reverse_char[(short int)source[halfway]];
-    }
+  {
+    dest[halfway] = reverse_char[(short int)source[halfway]];
+  }
 
   dest[length] = 0; //null term
 }

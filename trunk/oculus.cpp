@@ -69,14 +69,14 @@ int main(int argc, char** argv)
   // Parse Arguments
   //
   parseArgs(argc,argv,
-	    database,inputfp_1,inputfp_2,
-	    outputprefix,
-	    aligner_args,aligner_args2,aligner_args3,
-	    SE_mode,fQ_mode,
-	    base4_mode,silent_mode,
-	    set_mode,aligner_mode,
-	    RC_mode, force_fastq_mode, restore_qual,
-	    gzip_cfiles, compress_mode);
+            database,inputfp_1,inputfp_2,
+            outputprefix,
+            aligner_args,aligner_args2,aligner_args3,
+            SE_mode,fQ_mode,
+            base4_mode,silent_mode,
+            set_mode,aligner_mode,
+            RC_mode, force_fastq_mode, restore_qual,
+            gzip_cfiles, compress_mode);
 
   //generate output file paths based on user-specified output prefix
   strncat(strncat(compressedfp_1  ,outputprefix,MAX_FILENAME_LENGTH - 5),".cf1",5);
@@ -87,37 +87,37 @@ int main(int argc, char** argv)
   strncat(strncat(alignments_recon,outputprefix,MAX_FILENAME_LENGTH - 5),".sam",5);
 
   if(!silent_mode)
-    //silent mode basically means to shut up oculus's output
-    //  - by default it'll print run time, and stats about how its working
-    {
-      cout << "Input:\n";
-      SE_mode ? cout << "  Single end " : cout << "  Paired end ";
-      fQ_mode ? cout << "fastQ\n" : cout << "fastA\n";
-      cout << "Options:\n";
-      base4_mode ? cout << "  Forcing 2 bit nucleotides\n" : cout << "";
-      if(force_fastq_mode){ cout << "  Forcing fastQ intermediate file\n"; }
-      if(RC_mode){ cout << "  Storing reverse complements together\n"; }
-      if(aligner_mode == 0){      cout << "Aligner:\n  Bowtie\n"; }
-      else if(aligner_mode == 1){ cout << "Aligner:\n  BWA\n";    }
-      else{                       cout << "Aligner:\n  Custom\n"; }
-      
-      //
-      // Print the type of map that has been compiled in.  Uses compiler flags
-      //
+  //silent mode basically means to shut up oculus's output
+  //  - by default it'll print run time, and stats about how its working
+  {
+    cout << "Input:\n";
+    SE_mode ? cout << "  Single end " : cout << "  Paired end ";
+    fQ_mode ? cout << "fastQ\n" : cout << "fastA\n";
+    cout << "Options:\n";
+    base4_mode ? cout << "  Forcing 2 bit nucleotides\n" : cout << "";
+    if(force_fastq_mode){ cout << "  Forcing fastQ intermediate file\n"; }
+    if(RC_mode){ cout << "  Storing reverse complements together\n"; }
+    if(aligner_mode == 0){      cout << "Aligner:\n  Bowtie\n"; }
+    else if(aligner_mode == 1){ cout << "Aligner:\n  BWA\n";    }
+    else{                       cout << "Aligner:\n  Custom\n"; }
+
+    //
+    // Print the type of map that has been compiled in.  Uses compiler flags
+    //
 #if MAPTYPE == 1
-      cout << "Storage:\n  Hashmap";
+    cout << "Storage:\n  Hashmap";
 #elif MAPTYPE == 2
-      cout << "Storage:\n  Google Sparse Hashmap";
+    cout << "Storage:\n  Google Sparse Hashmap";
 #else
-      cerr << "Error: Maptype isn't correctly defined, exiting...\n";
-      exit(1);
+    cerr << "Error: Maptype isn't correctly defined, exiting...\n";
+    exit(1);
 #endif
-      set_mode ? cout << " + Hashset\n" : cout << "\n";
-      
-      gettimeofday(&times[1],NULL);
-      cout << "Compressing Input...";
-      cout.flush();
-    }
+    set_mode ? cout << " + Hashset\n" : cout << "\n";
+
+    gettimeofday(&times[1],NULL);
+    cout << "Compressing Input...";
+    cout.flush();
+  }
 
   //
   // Compress input file/s and populate map
@@ -127,26 +127,26 @@ int main(int argc, char** argv)
   ifstream readfile2;
   ofstream compfile2;
   if(!SE_mode)
-    {
-      readfile2.open(inputfp_2);
-      compfile2.open(compressedfp_2);
-    }
+  {
+    readfile2.open(inputfp_2);
+    compfile2.open(compressedfp_2);
+  }
 
   compressInput(readfile1,readfile2,
-		compfile1,compfile2,
-		SE_mode,fQ_mode,
-		base4_mode, set_mode,
-		RC_mode,force_fastq_mode,
-		single_set,multi_map,
-		memory_blocks,
-		total_lines,compressed_lines);
-  
+                compfile1,compfile2,
+                SE_mode,fQ_mode,
+                base4_mode, set_mode,
+                RC_mode,force_fastq_mode,
+                single_set,multi_map,
+                memory_blocks,
+                total_lines,compressed_lines);
+
   if(!silent_mode)
-    {
-      gettimeofday(&times[2],NULL);
-      cout << "done.\nWriting to file...";
-      cout.flush();
-    }
+  {
+    gettimeofday(&times[2],NULL);
+    cout << "done.\nWriting to file...";
+    cout.flush();
+  }
 
   //
   // Flush compresssed file buffers
@@ -157,13 +157,13 @@ int main(int argc, char** argv)
   compfile2.close();
 
   if(!silent_mode)
-    {
-      gettimeofday(&times[3],NULL);
-      if(aligner_mode == 0){      cout << "done.\nRunning Bowtie...\n"; }
-      else if(aligner_mode == 1){ cout << "done.\nRunning BWA...\n";    }
-      else{                       cout << "done.\nRunning this:\n"; }
-      cout.flush();
-    }
+  {
+    gettimeofday(&times[3],NULL);
+    if(aligner_mode == 0){      cout << "done.\nRunning Bowtie...\n"; }
+    else if(aligner_mode == 1){ cout << "done.\nRunning BWA...\n";    }
+    else{                       cout << "done.\nRunning this:\n"; }
+    cout.flush();
+  }
 
   //
   // Run the Aligner
@@ -172,40 +172,40 @@ int main(int argc, char** argv)
   int exit_status;
 
   if(aligner_mode == 0)
-    {
-      runBowtie(pid,(char*)BOWTIE,database,compressedfp_1,
-              compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
-    }
+  {
+    runBowtie(pid,(char*)BOWTIE,database,compressedfp_1,
+            compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
+  }
   else if(aligner_mode == 1)
-    {
-      runBWA(pid,(char*)BWA,database,
-         compressedfp_1,compressedfp_2,sai_1,sai_2,alignments,
-         SE_mode,fQ_mode,
-         aligner_args, aligner_args2, aligner_args3);
-    }
+  {
+    runBWA(pid,(char*)BWA,database,
+       compressedfp_1,compressedfp_2,sai_1,sai_2,alignments,
+       SE_mode,fQ_mode,
+       aligner_args, aligner_args2, aligner_args3);
+  }
   else
-    {
-	  SE_mode ? strncpy(custom_string,(char*)CUSTOM_ALIGNER_SE,MAX_FILENAME_LENGTH) :
-	            strncpy(custom_string,(char*)CUSTOM_ALIGNER_PE,MAX_FILENAME_LENGTH);
-	  runCustom(pid,custom_string,database,compressedfp_1,
-	          compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
-    }
+  {
+    SE_mode ? strncpy(custom_string,(char*)CUSTOM_ALIGNER_SE,MAX_FILENAME_LENGTH) :
+              strncpy(custom_string,(char*)CUSTOM_ALIGNER_PE,MAX_FILENAME_LENGTH);
+    runCustom(pid,custom_string,database,compressedfp_1,
+              compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
+  }
 
 
   cout.flush();
   waitpid(pid,&exit_status,0);
   if(!WIFEXITED(exit_status) || WEXITSTATUS(exit_status) != 0)
-    {
-      cerr << "Error: Aligner crashed.\n";
-      exit(1);
-    }
+  {
+    cerr << "Error: Aligner crashed.\n";
+    exit(1);
+  }
 
   if(!silent_mode)
-    {
-      gettimeofday(&times[4],NULL);
-      cout << "done.\nReconstituing Compressed Hits...";
-      cout.flush();
-    }
+  {
+    gettimeofday(&times[4],NULL);
+    cout << "done.\nReconstituing Compressed Hits...";
+    cout.flush();
+  }
 
   //
   // Reconstruct the hits that we removed before.  last functional step
@@ -214,53 +214,53 @@ int main(int argc, char** argv)
   ofstream reconfile(alignments_recon);
 
   reconstruct(alignfile, reconfile,
-	      SE_mode, fQ_mode,base4_mode, RC_mode,
-	      multi_map);
+              SE_mode, fQ_mode,base4_mode, RC_mode,
+              multi_map);
   
   if(!silent_mode)
-    {
-      gettimeofday(&times[5],NULL);
-      cout << "done.\nWriting to file...";
-      cout.flush();
-    }
+  {
+    gettimeofday(&times[5],NULL);
+    cout << "done.\nWriting to file...";
+    cout.flush();
+  }
       
   alignfile.close();
   reconfile.close();
 
   if(!silent_mode)
-    {
-      gettimeofday(&times[6],NULL);
-      cout << "done.\nFreeing memory...";
-      cout.flush();
-    }
+  {
+    gettimeofday(&times[6],NULL);
+    cout << "done.\nFreeing memory...";
+    cout.flush();
+  }
   
   //collecting garbage
   vector<unsigned char*>::iterator memory_it;
   for(memory_it=memory_blocks.begin();memory_it != memory_blocks.end();memory_it++)
-    {
-      free((void*)*memory_it);
-    }
+  {
+    free((void*)*memory_it);
+  }
   
   if(!silent_mode)
-    {
-      gettimeofday(&times[7],NULL);
-      cout << "done.\nTotal entries:          " << total_lines
-	   << "\nCompressed entries:     " << compressed_lines
-	   << "\nBowtie runtime:         "
-	   << getTimeElapsed(times[3],times[4])
-	   << "s\nExplicit file i/o wait: "
-	   << getTimeElapsed(times[2],times[3]) +
-              getTimeElapsed(times[5],times[6])
-	   << "s\nTime in Oculus:         "
-	   << getTimeElapsed(times[0],times[2]) +
-	      getTimeElapsed(times[4],times[5]) +
-              getTimeElapsed(times[6],times[7])
-	   << "s\nTotal runtime:          "
-	   << getTimeElapsed(times[0],times[7])
-	   << "s\nEstimated time saved:   "
-	   << (((double)total_lines / (double)compressed_lines) *
-	       getTimeElapsed(times[3],times[4])) - getTimeElapsed(times[0],times[7]) << "\n";
-    }
+  {
+    gettimeofday(&times[7],NULL);
+    cout << "done.\nTotal entries:          " << total_lines
+   << "\nCompressed entries:     " << compressed_lines
+   << "\nBowtie runtime:         "
+   << getTimeElapsed(times[3],times[4])
+   << "s\nExplicit file i/o wait: "
+   << getTimeElapsed(times[2],times[3]) +
+            getTimeElapsed(times[5],times[6])
+   << "s\nTime in Oculus:         "
+   << getTimeElapsed(times[0],times[2]) +
+      getTimeElapsed(times[4],times[5]) +
+            getTimeElapsed(times[6],times[7])
+   << "s\nTotal runtime:          "
+   << getTimeElapsed(times[0],times[7])
+   << "s\nEstimated time saved:   "
+   << (((double)total_lines / (double)compressed_lines) *
+       getTimeElapsed(times[3],times[4])) - getTimeElapsed(times[0],times[7]) << "\n";
+  }
 
   return 0;
 }
