@@ -30,10 +30,10 @@ sub usage()
 }
 
 if($#ARGV < 1)
-  {
-    usage();
-    exit(1);
-  }
+{
+  usage();
+  exit(1);
+}
 
 my $gsh = "";
 my $bwa = "";
@@ -43,90 +43,90 @@ my $custompe = "";
 
 my $i;
 for($i = 0; $i <= $#ARGV; $i++)
+{
+  if($ARGV[$i] eq "--g")
   {
-    if($ARGV[$i] eq "--g")
-      {
-        	if($i == $#ARGV){ usage(); exit(1); }
-        	$i++;
-        	$gsh = $ARGV[$i];
-      }
-    elsif($ARGV[$i] eq "--bwa")
-      {
-        	if($i == $#ARGV){ usage(); exit(1); }
-        	$i++;
-        	$bwa = $ARGV[$i];
-      }
-    elsif($ARGV[$i] eq "--bowtie")
-      {
-        	if($i == $#ARGV){ usage(); exit(1); }
-        	$i++;
-        	$bwt = $ARGV[$i];
-      }
-    elsif($ARGV[$i] eq "--customse")
-      {
-        	if($i == $#ARGV){ usage(); exit(1); }
-        	$i++;
-        	$customse = $ARGV[$i];
-      }
-    elsif($ARGV[$i] eq "--custompe")
-      {
-        	if($i == $#ARGV){ usage(); exit(1); }
-        	$i++;
-        	$custompe = $ARGV[$i];
-      }
-    else
-      {
-        	usage();
-        	exit(1);
-      }
+    	if($i == $#ARGV){ usage(); exit(1); }
+    	$i++;
+    	$gsh = $ARGV[$i];
   }
+  elsif($ARGV[$i] eq "--bwa")
+  {
+    	if($i == $#ARGV){ usage(); exit(1); }
+    	$i++;
+    	$bwa = $ARGV[$i];
+  }
+  elsif($ARGV[$i] eq "--bowtie")
+  {
+    	if($i == $#ARGV){ usage(); exit(1); }
+    	$i++;
+    	$bwt = $ARGV[$i];
+  }
+  elsif($ARGV[$i] eq "--customse")
+  {
+    	if($i == $#ARGV){ usage(); exit(1); }
+    	$i++;
+    	$customse = $ARGV[$i];
+  }
+  elsif($ARGV[$i] eq "--custompe")
+  {
+    	if($i == $#ARGV){ usage(); exit(1); }
+    	$i++;
+    	$custompe = $ARGV[$i];
+  }
+  else
+  {
+    	usage();
+    	exit(1);
+  }
+}
 
 if(!$bwa && !$bwt && !$customse && !$custompe)
-  {
-    usage();
-    exit(1);
-  }
+{
+  usage();
+  exit(1);
+}
 
 if($bwa && (!(-e $bwa) || !(-x $bwa) || !(-B $bwa)))
-  {
-    print STDERR "Error - $bwa doesn't look like a valid, executable, binary. Check permissions.\n";
-    exit(1);
-  }
+{
+  print STDERR "Error - $bwa doesn't look like a valid, executable, binary. Check permissions.\n";
+  exit(1);
+}
 
 if($bwt && (!(-e $bwt) || !(-x $bwt) || !(-B $bwt)))
-  {
-    print STDERR "Error - $bwt doesn't look like a valid, executable, binary. Check permissions.\n";
-    exit(1);
-  }
+{
+  print STDERR "Error - $bwt doesn't look like a valid, executable, binary. Check permissions.\n";
+  exit(1);
+}
 
 if($gsh && (!($gsh =~ m/include\/?$/g || $gsh =~ m/src\/$/g) || !(-d $gsh)))
-  {
-    print STDERR "Error - $gsh doesn't look like the google sparse hash include/src directory.\n";
-    exit(1);
-  }
-  
+{
+  print STDERR "Error - $gsh doesn't look like the google sparse hash include/src directory.\n";
+  exit(1);
+}
+
 if($custompe && (!($custompe =~ m/\@d/) ||
                  !($custompe =~ m/\@1/) ||
                  !($custompe =~ m/\@2/) ||
                  !($custompe =~ m/\@o/)))
 {
-    print STDERR "Error - custompe string is missing \@d, \@1, \@2, or \@o.\n";
-    exit(1);
+  print STDERR "Error - custompe string is missing \@d, \@1, \@2, or \@o.\n";
+  exit(1);
 }
 if($customse && (!($customse =~ m/\@d/) ||
                  !($customse =~ m/\@1/) ||
                  !($customse =~ m/\@o/)))
 {
-    print STDERR "Error - customse string is missing \@d, \@1, or \@o.\n";
-    exit(1);
+  print STDERR "Error - customse string is missing \@d, \@1, or \@o.\n";
+  exit(1);
 }
 
 my $map_type = 1;
 if($gsh)
-  {
-    $gsh = "-I " . $gsh;
-    $map_type = 2;
-  }
+{
+  $gsh = "-I " . $gsh;
+  $map_type = 2;
+}
 
 #this is ironically the best way of editing the makefile.  it guarantees it never gets obliterated.
 
