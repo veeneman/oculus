@@ -13,7 +13,7 @@ void parseArgs(int argc, char** argv,
                bool& SE, bool& fQ,
                bool& base4, bool& silent,
                bool& set_mode, int& aligner_mode,
-               bool& RC_mode, bool& force_fastq_mode, bool& restore_qual,
+               bool& RC_mode, bool& force_fastq_mode, bool& qual_mode,
                bool& gzip_cfiles, int& compress_mode)
 {
   database[0] = input1[0] = input2[0] = outputprefix[0] = 0;
@@ -115,7 +115,7 @@ void parseArgs(int argc, char** argv,
     }
     else if(strncmp(argv[i],"--restore_qual",15) == 0)
     {
-      restore_qual = true;
+      qual_mode = true;
     }
     else if(strncmp(argv[i],"-d",3) == 0)
     {
@@ -200,7 +200,7 @@ void parseArgs(int argc, char** argv,
   {
     strncat(outputprefix,"output",7); //default output path, creatively named "output"
   }
-  if(set_mode && restore_qual)
+  if(set_mode && qual_mode)
   {
     cerr << "Error: sets and quality retrieval are incompatible.\n";
     exit(1);

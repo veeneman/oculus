@@ -29,9 +29,10 @@ int main(int argc, char** argv)
   bool set_mode         = false;
   bool RC_mode          = false;
   bool force_fastq_mode = false;
-  bool restore_qual     = false;
+  bool qual_mode        = false;
   SET single_set;
   MAP multi_map;
+  NMAP nmulti_map; //used for qual retrieval
   int total_lines = 0;
   int compressed_lines = 0;
   vector<unsigned char*> memory_blocks;
@@ -49,10 +50,13 @@ int main(int argc, char** argv)
   char            sai_2[MAX_FILENAME_LENGTH];
   char       alignments[MAX_FILENAME_LENGTH];
   char alignments_recon[MAX_FILENAME_LENGTH];
+  char            tmpfp[MAX_FILENAME_LENGTH];
+  char         sortedfp[MAX_FILENAME_LENGTH];
   char     aligner_args[MAX_ARG_LEN];
   char     aligner_args2[MAX_ARG_LEN];
   char     aligner_args3[MAX_ARG_LEN];
   char     custom_string[MAX_FILENAME_LENGTH];
+  char         sort_cmd[MAX_FILENAME_LENGTH*2];
   //blank them
   compressedfp_1[0] = 0;
   compressedfp_2[0] = 0;
@@ -64,6 +68,8 @@ int main(int argc, char** argv)
   aligner_args[0] = 0;
   aligner_args2[0] = 0;
   aligner_args3[0] = 0;
+  tmpfp[0] = 0;
+  sortedfp[0] = 0;
   
   //
   // Parse Arguments
@@ -75,7 +81,7 @@ int main(int argc, char** argv)
             SE_mode,fQ_mode,
             base4_mode,silent_mode,
             set_mode,aligner_mode,
-            RC_mode, force_fastq_mode, restore_qual,
+            RC_mode, force_fastq_mode, qual_mode,
             gzip_cfiles, compress_mode);
 
   //generate output file paths based on user-specified output prefix
@@ -85,6 +91,12 @@ int main(int argc, char** argv)
   strncat(strncat(sai_2           ,outputprefix,MAX_FILENAME_LENGTH - 6),".sai2",6);
   strncat(strncat(alignments      ,outputprefix,MAX_FILENAME_LENGTH - 5),".cmp",5);
   strncat(strncat(alignments_recon,outputprefix,MAX_FILENAME_LENGTH - 5),".sam",5);
+  strncat(strncat(tmpfp           ,outputprefix,MAX_FILENAME_LENGTH - 5),".ids",4);
+  strncat(strncat(sortedfp        ,outputprefix,MAX_FILENAME_LENGTH - 5),".sorted_ids",12);
+  strncat(strncat(strncat(strncat(sort_cmd,"sort -k 1,1 ", 13),
+                                  tmpfp,MAX_FILENAME_LENGTH),
+                                  " > ",4),
+                                  sortedfp,MAX_FILENAME_LENGTH);
 
   if(!silent_mode)
   //silent mode basically means to shut up oculus's output
@@ -124,6 +136,7 @@ int main(int argc, char** argv)
   //
   ifstream readfile1(inputfp_1); // the files are opened out here to facilitate measuring file write time
   ofstream compfile1(compressedfp_1);
+  ofstream tmpfile(tmpfp);
   ifstream readfile2;
   ofstream compfile2;
   if(!SE_mode)
@@ -134,10 +147,11 @@ int main(int argc, char** argv)
 
   compressInput(readfile1,readfile2,
                 compfile1,compfile2,
+                tmpfile,
                 SE_mode,fQ_mode,
                 base4_mode, set_mode,
-                RC_mode,force_fastq_mode,
-                single_set,multi_map,
+                RC_mode,force_fastq_mode, qual_mode,
+                single_set,multi_map,nmulti_map,
                 memory_blocks,
                 total_lines,compressed_lines);
 
@@ -155,6 +169,22 @@ int main(int argc, char** argv)
   readfile2.close();
   compfile1.close();
   compfile2.close();
+  tmpfile.close();
+
+  //
+  // Sort id file
+  //
+
+  if(qual_mode)
+  {
+    if(!silent_mode)
+    {
+      cout << "done.\nSorting ID file...\n";
+      cout.flush();
+    }
+
+    system(sort_cmd);
+  }
 
   if(!silent_mode)
   {
@@ -211,11 +241,12 @@ int main(int argc, char** argv)
   // Reconstruct the hits that we removed before.  last functional step
   //
   ifstream alignfile(alignments);
+  ifstream ids(sortedfp);
   ofstream reconfile(alignments_recon);
 
-  reconstruct(alignfile, reconfile,
-              SE_mode, fQ_mode,base4_mode, RC_mode,
-              multi_map);
+  reconstruct(alignfile, reconfile, ids,
+              SE_mode, fQ_mode,base4_mode, RC_mode, qual_mode,
+              multi_map,nmulti_map);
   
   if(!silent_mode)
   {
