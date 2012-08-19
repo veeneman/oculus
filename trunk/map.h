@@ -35,6 +35,8 @@ using __gnu_cxx::hash;
 using namespace __gnu_cxx;
 
 typedef pair<unsigned char*,pair<int, int> > MAP_ENTRY;
+typedef struct { int id, forward, reverse; } triple;
+typedef pair<unsigned char*,triple > NMAP_ENTRY; //"named" map
 
 namespace __gnu_cxx
 {
@@ -145,6 +147,7 @@ struct EQ_comparison //hashmap needs an equals operator for comparison
 #if MAPTYPE == 1
 // Regular old STL (standard library) hash
 typedef hash_map<unsigned char*, pair<int, int>, hash<unsigned char*>, EQ_comparison> MAP;
+typedef hash_map<unsigned char*, triple, hash<unsigned char*>, EQ_comparison> NMAP;
 typedef hash_set<unsigned char*, hash<unsigned char*>, EQ_comparison> SET;
 
 #else
@@ -154,6 +157,7 @@ typedef hash_set<unsigned char*, hash<unsigned char*>, EQ_comparison> SET;
 using google::sparse_hash_map;
 using google::sparse_hash_set;
 typedef sparse_hash_map<unsigned char*, pair<int, int>, hash<unsigned char*>, EQ_comparison> MAP;
+typedef sparse_hash_map<unsigned char*, triple, hash<unsigned char*>, EQ_comparison> NMAP;
 typedef sparse_hash_set<unsigned char*, hash<unsigned char*>, EQ_comparison> SET;
 
 #endif

@@ -28,15 +28,16 @@ void runCustom(pid_t&,char*,char*,char*,char*,char*,bool,bool,char*);
 void runBWA(pid_t&,char*,char*,char*,char*,char*,char*,char*,bool,bool,char*,char*,char*);
 void compressInput(ifstream&, ifstream&,
                    ofstream&, ofstream&,
+                   ofstream&,
                    bool, bool&,
                    bool, bool,
-                   bool, bool,
-                   SET&, MAP&,
+                   bool, bool, bool,
+                   SET&, MAP&, NMAP&,
                    vector<unsigned char*>&,
                    int&, int&);
-void reconstruct(ifstream&, ofstream&,
-                 bool, bool, bool, bool,
-                 MAP&);
+void reconstruct(ifstream&, ofstream&, ifstream&,
+                 bool, bool, bool, bool, bool,
+                 MAP&,NMAP&);
 
 double getTimeElapsed(timeval start, timeval now)
 {

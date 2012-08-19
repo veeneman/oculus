@@ -16,10 +16,11 @@ void check(ifstream& readfile)
 
 void compressInput(ifstream& readfile1, ifstream& readfile2,
                    ofstream& compfile1, ofstream& compfile2,
+                   ofstream& tmpfile,
                    bool SE_mode, bool& fQ_mode,
                    bool base4_mode, bool set_mode,
-                   bool RC_mode, bool force_fastq_mode,
-                   SET& single_set, MAP& multi_map,
+                   bool RC_mode, bool force_fastq_mode, bool qual_mode,
+                   SET& single_set, MAP& multi_map,NMAP& nmulti_map,
                    vector<unsigned char*>& memory_blocks,
                    int& count, int& compressed_count)
 {
@@ -34,8 +35,10 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
   char quality_line2[MLS];
   char lookup_seq[MLS*2];
   short int key_length;
+  int id;
   pair<SET::iterator,bool> key_lookup_sh;
   pair<MAP::iterator,bool> key_lookup_mh;
+  pair<NMAP::iterator,bool> key_lookup_nmh;
   int sequence_length;
   bool reversed = false;
 
@@ -192,7 +195,7 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
         }
       }
     }
-    else //map-only mode
+    else if(!qual_mode) //map-only mode
     {
       key_lookup_mh = multi_map.insert(MAP_ENTRY(key,pair<int, int>(0,0)));
 
@@ -215,6 +218,51 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
       else //didn't insert - it was in there already
       {
         reversed ? key_lookup_mh.first->second.second++ : key_lookup_mh.first->second.first++;
+      }
+    }
+    else //map-mode, and save quality scores
+    {
+      key_lookup_nmh = nmulti_map.insert(NMAP_ENTRY(key,(triple){count,0,0}));
+      if(key_lookup_nmh.second) //inserted OK
+      {
+        id = count;
+        compressed_count++; //increment count
+        block_iter += (((key[0] % 128) * 256 + key[1]) + 2); //roll forward memory
+
+        //since it's the first, print to file.
+        if(force_fastq_mode){ compfile1 << "@"; } else { compfile1 << ">"; }
+        compfile1 << count << "\n" << sequence_line1 << "\n";
+        if(fQ_mode && force_fastq_mode){compfile1 << useless_line1 << "\n" << quality_line1 << "\n";}
+        if(!SE_mode)
+        {
+          if(force_fastq_mode){ compfile1 << "@"; } else { compfile2 << ">"; }
+          compfile2 << count << "\n" << sequence_line2 << "\n";
+          if(fQ_mode && force_fastq_mode){compfile2 << useless_line2 << "\n" << quality_line2 << "\n";}
+        }
+      }
+      else //didn't insert - it was in there already
+      {
+        id = key_lookup_nmh.first->second.id;
+        reversed ? key_lookup_nmh.first->second.reverse++ : key_lookup_nmh.first->second.forward++;
+      }
+
+      //print name & qual to temp file
+      if(SE_mode && fQ_mode)
+      {
+        tmpfile << id << "\t" << header_line1 << "\t" << quality_line1 << "\n";
+      }
+      else if(SE_mode) // !fQ
+      {
+        tmpfile << id << "\t" << header_line1 << "\n";
+      }
+      else if(fQ_mode) // !SE
+      {
+        tmpfile << id << "\t" << header_line1 << "\t" << quality_line1
+                << "\t" << header_line2 << "\t" << quality_line2 << "\n";
+      }
+      else //!SE & !fQ
+      {
+        tmpfile << id << "\t" << header_line1 << "\t" << header_line2 << "\n";
       }
     }
   }
