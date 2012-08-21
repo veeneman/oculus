@@ -5,13 +5,17 @@
 //  aligner, it rebuilds the results of the sequence reads that were removed.
 
 void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
-		 bool SE_mode,bool fQ_mode,
-		 bool base4_mode, bool RC_mode, bool qual_mode,
-		 MAP& multi_map,NMAP& multi_nmap)
+     bool SE_mode,bool fQ_mode,
+     bool base4_mode, bool RC_mode, bool qual_mode,
+     MAP& multi_map,NMAP& multi_nmap)
 {
   //variables
   int i;
+  int j;
+  int k;
   int tab_count;
+  int nameend_1;
+  int nameend_2;
   int seqstart_1;
   int seqstart_2;
   int seqend_1;
@@ -20,24 +24,39 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
   int flagstart_2;
   int flagend_1;
   int flagend_2;
+  int qualstart_1;
+  int qualstart_2;
   int qualend_1;
   int qualend_2;
   int flag1;
   int flag2;
+  char rflag1[MLS];
+  char rflag2[MLS];
   int forward_count;
   int reverse_count;
   char line1[MLS];
   char line2[MLS];
+  char printline1[MLS];
+  char printline2[MLS];
   char id_line[MLS];
   char seq1[MLS];
   char seq2[MLS];
   char lookup_seq[MLS*2];
+  int id_fields[6];
   unsigned char lookup_key[MLS*2];
   MAP::iterator key_lookup_mh;
   NMAP::iterator key_lookup_nmh;
   bool reversed = false;
   char reverse_line[MLS];
   char reverse_seq[MLS];
+  int expected_id_fields;
+  if(qual_mode)
+  {
+    if(SE_mode && !fQ_mode){ expected_id_fields = 2; }
+    else if(SE_mode && fQ_mode){ expected_id_fields = 3; }
+    else if(!SE_mode && !fQ_mode){ expected_id_fields = 3; }
+    else { expected_id_fields = 5; }
+  }
   
   while(alignments.good())
   {
@@ -52,10 +71,11 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
       break;
     }
 
-    recon << line1 << "\n"; //print a copy of the line
+    if(!qual_mode) { recon << line1 << "\n"; } //print a copy of the line
 
     if(line1[0] == '@') //header line
     {
+      recon << line1 << "\n";
       continue;
     }
 
@@ -75,7 +95,7 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
         exit(1);
       }
 
-      recon << line2 << "\n"; //print a copy of the line
+      if(!qual_mode) { recon << line2 << "\n"; } //print a copy of the line
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -93,6 +113,7 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
 
         if(tab_count == 1) //flag field
         {
+          nameend_1 = i;
           flagstart_1 = i + 1;
         }
         else if(tab_count == 2) //end of flag field
@@ -106,6 +127,7 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
         else if(tab_count == 10) //end of sequence field
         {
           seqend_1 = i;
+          qualstart_1 = i + 1;
           i++;
           break;
         }
@@ -144,6 +166,7 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
 
           if(tab_count == 1) //flag
           {
+            nameend_2 = i;
             flagstart_2 = i + 1;
           }
           else if(tab_count == 2) // endflag
@@ -157,6 +180,7 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
           else if(tab_count == 10) //end of sequence
           {
             seqend_2 = i;
+            qualstart_2 = i + 1;
             i++;
             break;
           }
@@ -281,169 +305,300 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
     {
       if((int)((flag1 % 32) / 16) == 1)
       {
-        flag1 -= 16;
+        sprintf(rflag1,"%d",(flag1 - 16));
         reversed = !reversed;
       }
       else
       {
-        flag1 += 16;
+        sprintf(rflag1,"%d",(flag1 + 16));
       }
     }
     else
     {
       if((int)((flag1 % 256) / 128) == 1)
       {
-        flag1 -= 64;
-        flag2 += 64;
+        sprintf(rflag1,"%d",(flag1 - 64));
+        sprintf(rflag2,"%d",(flag2 + 64));
       }
       else
       {
-        flag1 += 64;
-        flag2 -= 64;
+        sprintf(rflag1,"%d",(flag1 + 64));
+        sprintf(rflag2,"%d",(flag2 - 64));
       }
     }
 
     if(!qual_mode)
     {
       key_lookup_mh = multi_map.find(lookup_key);
-      if(key_lookup_mh != multi_map.end())
+      if(key_lookup_mh == multi_map.end()) { cerr << "seq not found in hash\n"; exit(1); }
+
+      if(!reversed)
       {
-        if(!reversed)
-        {
-          forward_count = (key_lookup_mh->second).first;
-          reverse_count = (key_lookup_mh->second).second;
-        }
-        else
-        {
-          forward_count = (key_lookup_mh->second).second;
-          reverse_count = (key_lookup_mh->second).first;
-        }
+        forward_count = (key_lookup_mh->second).first;
+        reverse_count = (key_lookup_mh->second).second;
+      }
+      else
+      {
+        forward_count = (key_lookup_mh->second).second;
+        reverse_count = (key_lookup_mh->second).first;
+      }
 
-        for(i = 0; i < forward_count; i++) //print forward hash entries in same orientation
+      for(i = 0; i < forward_count; i++) //print forward hash entries in same orientation
+      {
+        recon << line1 << "\n";
+        if(!SE_mode)
         {
-          recon << line1 << "\n";
-          if(!SE_mode)
-          {
-            recon << line2 << "\n";
-          }
+          recon << line2 << "\n";
         }
-        for(i = 0; i < reverse_count; i++) //and reverse hash entries in opposite orientation
-        {
-          // 'Opposite orientation' here is interesting - it means both with a changed flag,
-          // and in SE potentially a reversed sequence, and in PE potentially a reversed order.
-          // The issue stems from bowtie outputting reads in their original orientation if they map to nothing.
+      }
+      for(i = 0; i < reverse_count; i++) //and reverse hash entries in opposite orientation
+      {
+        // 'Opposite orientation' here is interesting - it means both with a changed flag,
+        // and in SE potentially a reversed sequence, and in PE potentially a reversed order.
+        // The issue stems from bowtie outputting reads in their original orientation if they map to nothing.
 
+        reverse_line[0] = 0;
+
+        if(!SE_mode && (((flag1 % 8) / 4) == 1)) // surprise! - for unmapped reverse entries of PE, they should be printed in opposite order
+        //it may also be necessary to check the second flag, XXX, though this seems unlikely - i think either both map or neither do
+        {
+          strncat(reverse_line,line2,flagstart_2);
+          recon << reverse_line << rflag2 << line2 + flagend_2 << "\n";
           reverse_line[0] = 0;
-
-          if(!SE_mode && (((flag1 % 8) / 4) == 1)) // surprise! - for unmapped reverse entries of PE, they should be printed in opposite order
-          //it may also be necessary to check the second flag, XXX, though this seems unlikely - i think either both map or neither do
-          {
-            strncat(reverse_line,line2,flagstart_2);
-            recon << reverse_line << flag2 << line2 + flagend_2 << "\n";
-            reverse_line[0] = 0;
-            strncat(reverse_line,line1,flagstart_1);
-            recon << reverse_line << flag1 << line1 + flagend_1 << "\n";
-          }
-          else if(!SE_mode) //regular old PE
-          {
-            strncat(reverse_line,line1,flagstart_1);
-            recon << reverse_line << flag1 << line1 + flagend_1 << "\n";
-            reverse_line[0] = 0;
-            strncat(reverse_line,line2,flagstart_2);
-            recon << reverse_line << flag2 << line2 + flagend_2 << "\n";
-          }
-          else if(((flag1 % 8) / 4) == 1) //if it's unmapped, reverse the sequence, not the flag (SE)
-          {
-            strncat(reverse_line,line1,seqstart_1);
-            reverseComplement(line1 + seqstart_1, reverse_seq, seqend_1 - seqstart_1);
-            recon << reverse_line << reverse_seq << line1 + seqend_1 << "\n";
-          }
-          else //reverse the flag (SE, and mapped)
-          {
-            strncat(reverse_line,line1,flagstart_1);
-            recon << reverse_line << flag1 << line1 + flagend_1 << "\n";
-          }
+          strncat(reverse_line,line1,flagstart_1);
+          recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
+        }
+        else if(!SE_mode) //regular old PE
+        {
+          strncat(reverse_line,line1,flagstart_1);
+          recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
+          reverse_line[0] = 0;
+          strncat(reverse_line,line2,flagstart_2);
+          recon << reverse_line << rflag2 << line2 + flagend_2 << "\n";
+        }
+        else if(((flag1 % 8) / 4) == 1) //if it's unmapped, reverse the sequence, not the flag (SE)
+        {
+          strncat(reverse_line,line1,seqstart_1);
+          reverseComplement(line1 + seqstart_1, reverse_seq, seqend_1 - seqstart_1);
+          recon << reverse_line << reverse_seq << line1 + seqend_1 << "\n";
+        }
+        else //reverse the flag (SE, and mapped)
+        {
+          strncat(reverse_line,line1,flagstart_1);
+          recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
         }
       }
     }
-    else //qual_mode
+    else //qual mode
     {
-      //this goes in recon loop
-      /*ids.getline(id_line,MLS);
-      tab_count = 0;
-      for(i = 0;id_line[i] != 0; i++) //iterate through line
-      {
-        if(id_line[i] == '\t')
-        {
-          tab_count++;
-          if(tab_count == 1)
-          {
-
-          }
-        }
-      }*/
-
       key_lookup_nmh = multi_nmap.find(lookup_key);
-      if(key_lookup_nmh != multi_nmap.end()) //XXX - i dont think this ever fails
+      if(key_lookup_nmh == multi_nmap.end()) { cerr << "seq not found in hash\n"; exit(1); }
+
+      if(!reversed) //means the output is reversed wrt what oculus stored
       {
-        if(!reversed)
-        {
-          forward_count = (key_lookup_nmh->second).forward;
-          reverse_count = (key_lookup_nmh->second).reverse;
-        }
-        else
-        {
-          forward_count = (key_lookup_nmh->second).reverse;
-          reverse_count = (key_lookup_nmh->second).forward;
-        }
+        forward_count = (key_lookup_nmh->second).forward + 1;
+        reverse_count = (key_lookup_nmh->second).reverse;
+      }
+      else
+      {
+        //cout << "reversedXXXXXXXXXX\n";
+        forward_count = (key_lookup_nmh->second).reverse + 1;
+        reverse_count = (key_lookup_nmh->second).forward;
+      }
 
-        for(i = 0; i < forward_count; i++) //print forward hash entries in same orientation
-        { //XXX
-          recon << line1 << "\n";
-          if(!SE_mode)
+      k = forward_count + reverse_count;
+      for(i = 0; i < k; i++) //print forward hash entries in same orientation
+      {
+        ids.getline(id_line,MLS);
+
+        for(j = 0, tab_count = 0;id_line[j] != 0; j++) //iterate through entire ID line
+        {
+          if(id_line[j] == '\t')
           {
-            recon << line2 << "\n";
+            tab_count++;
+            id_fields[tab_count] = j;
+
+            if(tab_count == (expected_id_fields - 1)){ break; }
           }
         }
-        for(i = 0; i < reverse_count; i++) //and reverse hash entries in opposite orientation
+        for( j = j + 1 ; ; j++) //find end of last field
         {
-          // 'Opposite orientation' here is interesting - it means both with a changed flag,
-          // and in SE potentially a reversed sequence, and in PE potentially a reversed order.
-          // The issue stems from bowtie outputting reads in their original orientation if they map to nothing.
-
-          reverse_line[0] = 0;
-
-          if(!SE_mode && (((flag1 % 8) / 4) == 1)) // surprise! - for unmapped reverse entries of PE, they should be printed in opposite order
-          //it may also be necessary to check the second flag, XXX, though this seems unlikely - i think either both map or neither do
+          if(id_line[j] == '\t' || id_line[j] == ' ' || id_line[j] == '\n' || id_line[j] == '\0' )
           {
-            strncat(reverse_line,line2,flagstart_2);
-            recon << reverse_line << flag2 << line2 + flagend_2 << "\n";
-            reverse_line[0] = 0;
-            strncat(reverse_line,line1,flagstart_1);
-            recon << reverse_line << flag1 << line1 + flagend_1 << "\n";
+            tab_count++;
+            id_fields[tab_count] = j;
+            break;
           }
-          else if(!SE_mode) //regular old PE
+        }
+        printline1[0] = 0;
+        printline2[0] = 0;
+        reverse_seq[0] = 0;
+        strncat(printline1,id_line + id_fields[1] + 1,(id_fields[2] - id_fields[1] - 1));
+
+        if(!fQ_mode && SE_mode)
+        {
+          if((i >= forward_count) && (((flag1 % 8) / 4) == 1)) //if it's unmapped, reverse the sequence, not the flag (SE)
           {
-            strncat(reverse_line,line1,flagstart_1);
-            recon << reverse_line << flag1 << line1 + flagend_1 << "\n";
-            reverse_line[0] = 0;
-            strncat(reverse_line,line2,flagstart_2);
-            recon << reverse_line << flag2 << line2 + flagend_2 << "\n";
-          }
-          else if(((flag1 % 8) / 4) == 1) //if it's unmapped, reverse the sequence, not the flag (SE)
-          {
-            strncat(reverse_line,line1,seqstart_1);
+            //rc sequence, flag unchanged
+            strncat(printline1,line1 + nameend_1,(seqstart_1 - nameend_1));
             reverseComplement(line1 + seqstart_1, reverse_seq, seqend_1 - seqstart_1);
-            recon << reverse_line << reverse_seq << line1 + seqend_1 << "\n";
+            strcat(printline1,reverse_seq);
+            strcat(printline1,line1 + seqend_1);
           }
-          else //reverse the flag (SE, and mapped)
+          else if(i >= forward_count)
           {
-            strncat(reverse_line,line1,flagstart_1);
-            recon << reverse_line << flag1 << line1 + flagend_1 << "\n";
+            //different flag
+            strncat(printline1,line1 + nameend_1,(flagstart_1 - nameend_1));
+            strcat(printline1,rflag1);
+            strcat(printline1,line1 + flagend_1);
           }
+          else
+          {
+            strcat(printline1,line1 + nameend_1);
+          }
+        }
+        else if(!fQ_mode && !SE_mode)
+        {
+          if((i >= forward_count) ) //&& (((rflag1 % 8) / 4) == 1) XXX - ignoring order for now
+          {
+            //different flag
+            strncat(printline1,line1 + nameend_1,(flagstart_1 - nameend_1));
+            strcat(printline1,rflag1);
+            strcat(printline1,line1 + flagend_1);
+
+            strncat(printline2,id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1));
+            strncat(printline2,line2 + nameend_2,(flagstart_2 - nameend_2));
+            strcat(printline2,rflag2);
+            strcat(printline2,line2 + flagend_2);
+          }
+          else
+          {
+            strcat(printline1,line1 + nameend_1);
+            strncat(printline2,id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1));
+            strcat(printline2,line2 + nameend_2);
+          }
+        }
+        else if(fQ_mode)
+        {
+          if(SE_mode)
+          {
+            if(((int)((flag1 % 32) / 16) == 1) || ((i >= forward_count) && (((flag1 % 8) / 4) == 1)))
+            {
+              reverseOrder(id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1));
+            }
+            if((i >= forward_count) && (((flag1 % 8) / 4) == 1)) //if it's unmapped, reverse the sequence, not the flag (SE)
+            {
+              //rc sequence, flag unchanged
+              strncat(printline1,line1 + nameend_1,(seqstart_1 - nameend_1));
+              reverseComplement(line1 + seqstart_1, reverse_seq, seqend_1 - seqstart_1);
+              strcat(printline1,reverse_seq);
+              strncat(printline1,line1 + seqend_1,(qualstart_1 - seqend_1));
+              strncat(printline1,id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1)); //qual1
+              strcat(printline1,line1 + qualend_1);
+            }
+            else if(i >= forward_count)
+            {
+              //different flag
+              strncat(printline1,line1 + nameend_1,(flagstart_1 - nameend_1));
+              strcat(printline1,rflag1);
+              strncat(printline1,line1 + flagend_1,(qualstart_1 - flagend_1));
+              strncat(printline1,id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1)); //qual1
+              strcat(printline1,line1 + qualend_1);
+            }
+            else
+            {
+              strncat(printline1,line1 + nameend_1,qualstart_1 - nameend_1);
+              strncat(printline1,id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1)); //qual1
+              strcat(printline1,line1 + qualend_1);
+            }
+          }
+          else //fq & pe
+          {
+
+
+
+
+            if((int)((flag1 % 32) / 16) == 1)
+            {
+              if((((int)((flag1 % 256) / 128) == 1) && ((int)((flag2 % 128) / 64) == 1)) != ( i >= forward_count)) //xor
+              {
+                reverseOrder(id_line + id_fields[4] + 1,(id_fields[5] - id_fields[4] - 1));
+              }
+              else
+              {
+                reverseOrder(id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1));
+              }
+            }
+            if((int)((flag2 % 32) / 16) == 1)
+            {
+              if((((int)((flag1 % 256) / 128) == 1) && ((int)((flag2 % 128) / 64) == 1)) != (i >= forward_count)) //xor
+              {
+                reverseOrder(id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1));
+              }
+              else
+              {
+                reverseOrder(id_line + id_fields[4] + 1,(id_fields[5] - id_fields[4] - 1));
+              }
+            }
+
+            if((i >= forward_count) ) //&& (((rflag1 % 8) / 4) == 1) XXX - ignoring order for now
+            {
+              //reverse it with reverse flag
+              strncat(printline1,line1 + nameend_1,(flagstart_1 - nameend_1));
+              strcat(printline1,rflag1);
+              //strcat(printline1,line1 + flagend_1);
+            }
+            else
+            {
+              strncat(printline1,line1 + nameend_1, (flagend_1 - nameend_1));
+            }
+
+            strncat(printline1,line1 + flagend_1,qualstart_1 - flagend_1);
+
+            if((((int)((flag1 % 256) / 128) == 1) && ((int)((flag2 % 128) / 64) == 1)) != (i >= forward_count)) //xor
+            {
+              strncat(printline1,id_line + id_fields[4] + 1,(id_fields[5] - id_fields[4] - 1));//qual2
+            }
+            else
+            {
+              strncat(printline1,id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1));//qual1
+            }
+            strcat(printline1,line1 + qualend_1);
+
+            strncat(printline2,id_line + id_fields[3] + 1,(id_fields[4] - id_fields[3] - 1));
+
+            if((i >= forward_count) ) //&& (((rflag1 % 8) / 4) == 1) XXX - ignoring order for now
+            {
+              //different flag
+              strncat(printline2,line2 + nameend_2,(flagstart_2 - nameend_2));
+              strcat(printline2,rflag2);
+              //strcat(printline2,line2 + flagend_2);
+            }
+            else
+            {
+              strncat(printline2,line2 + nameend_2, (flagend_2 - nameend_2));
+            }
+
+            strncat(printline2,line2 + flagend_2,qualstart_2 - flagend_2);
+
+            if((((int)((flag1 % 256) / 128) == 1) && ((int)((flag2 % 128) / 64) == 1)) != (i >= forward_count)) //xor
+            {
+              strncat(printline2,id_line + id_fields[2] + 1,(id_fields[3] - id_fields[2] - 1));//qual1
+            }
+            else
+            {
+              strncat(printline2,id_line + id_fields[4] + 1,(id_fields[5] - id_fields[4] - 1));//qual2
+            }
+            strcat(printline2,line2 + qualend_2);
+          }
+        }
+
+        recon << printline1 << "\n";
+        if(!SE_mode)
+        {
+          recon << printline2 << "\n";
         }
       }
     }
   }
 }
-

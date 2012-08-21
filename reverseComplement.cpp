@@ -36,6 +36,18 @@ void reverseComplement(char* source, char* dest, int length) //XXX shouldn't be 
   dest[length] = 0;
 }
 
+void reverseOrder(char* input_string, int length)
+{
+  char temp;
+  int k = length / 2;
+  for(int i = 0; i < k; i++)
+  {
+    temp = input_string[i];
+    input_string[i] = input_string[length - i - 1];
+    input_string[length - i - 1] = temp;
+  }
+}
+
 void oneWayRC(char* source, char* dest, int length, bool& reversed)
 {
   reversed = false;

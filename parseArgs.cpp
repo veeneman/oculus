@@ -205,6 +205,11 @@ void parseArgs(int argc, char** argv,
     cerr << "Error: sets and quality retrieval are incompatible.\n";
     exit(1);
   }
+  if(qual_mode && RC_mode)
+  {
+    cerr << "Error: reverse-complement storage and quality retrieval are incompatible.\n";
+    exit(1);
+  }
 
   if(SE)
   {

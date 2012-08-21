@@ -31,7 +31,7 @@ void runBowtie(pid_t& pid,
                char* bowtie, char* database,
                char* cfile1, char* cfile2,
                char* alnfile,
-               bool SE_mode, bool fQ_mode,
+               bool SE_mode, bool force_fastq_mode,
                char* arguments)
 {
   //command to execute, args must be separate
@@ -49,9 +49,9 @@ void runBowtie(pid_t& pid,
     argpointer = strtok(NULL," ");
   }
   
-  if(!fQ_mode)
+  if(!force_fastq_mode)
   {
-    argv.push_back((char*)"-f"); //fasta - casting added
+    argv.push_back((char*)"-f"); //fasta
   }
   if(SE_mode)
   {
@@ -80,9 +80,7 @@ void runBowtie(pid_t& pid,
 void runCustom(pid_t& pid,
                char* custom_string, char* database,
                char* cfile1, char* cfile2,
-               char* alnfile,
-               bool SE_mode, bool fQ_mode,
-               char* arguments)
+               char* alnfile, char* arguments)
 {
   //command to execute, args must be separate
   // I used vectors in these functions for convenience
@@ -124,7 +122,7 @@ void runBWA(pid_t& pid,
             char* cfile1, char* cfile2,
             char* sai1, char* sai2,
             char* alnfile,
-            bool SE_mode, bool fQ_mode,
+            bool SE_mode, bool force_fastq_mode,
             char* user_args1, char* user_args2, char* user_args3)
 {
   //This is largely similar to running bowtie, except I'm using arrays here to reduce code

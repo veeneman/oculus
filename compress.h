@@ -10,5 +10,6 @@ void compressSequence(char*,unsigned char*);
 void compressSequence4(char*, unsigned char*);
 void print_cseq(unsigned char*);
 void reverseComplement(char*, char*, int);
+void reverseOrder(char*, int);
 void oneWayRC(char*, char*, int, bool&);
 void check(ifstream&);
