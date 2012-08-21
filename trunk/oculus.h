@@ -24,7 +24,7 @@ void parseArgs(int,char**,
                bool&,int&);
 void usage(int);
 void runBowtie(pid_t&,char*,char*,char*,char*,char*,bool,bool,char*);
-void runCustom(pid_t&,char*,char*,char*,char*,char*,bool,bool,char*);
+void runCustom(pid_t&,char*,char*,char*,char*,char*,char*);
 void runBWA(pid_t&,char*,char*,char*,char*,char*,char*,char*,bool,bool,char*,char*,char*);
 void compressInput(ifstream&, ifstream&,
                    ofstream&, ofstream&,

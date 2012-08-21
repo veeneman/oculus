@@ -93,7 +93,7 @@ int main(int argc, char** argv)
   strncat(strncat(alignments_recon,outputprefix,MAX_FILENAME_LENGTH - 5),".sam",5);
   strncat(strncat(tmpfp           ,outputprefix,MAX_FILENAME_LENGTH - 5),".ids",4);
   strncat(strncat(sortedfp        ,outputprefix,MAX_FILENAME_LENGTH - 5),".sorted_ids",12);
-  strncat(strncat(strncat(strncat(sort_cmd,"sort -k 1,1 ", 13),
+  strncat(strncat(strncat(strncat(sort_cmd,"sort -k 1,1n ", 14),
                                   tmpfp,MAX_FILENAME_LENGTH),
                                   " > ",4),
                                   sortedfp,MAX_FILENAME_LENGTH);
@@ -179,7 +179,7 @@ int main(int argc, char** argv)
   {
     if(!silent_mode)
     {
-      cout << "done.\nSorting ID file...\n";
+      cout << "done.\nSorting ID file...";
       cout.flush();
     }
 
@@ -189,8 +189,8 @@ int main(int argc, char** argv)
   if(!silent_mode)
   {
     gettimeofday(&times[3],NULL);
-    if(aligner_mode == 0){      cout << "done.\nRunning Bowtie...\n"; }
-    else if(aligner_mode == 1){ cout << "done.\nRunning BWA...\n";    }
+    if(aligner_mode == 0){      cout << "done.\nRunning Bowtie..."; }
+    else if(aligner_mode == 1){ cout << "done.\nRunning BWA...";    }
     else{                       cout << "done.\nRunning this:\n"; }
     cout.flush();
   }
@@ -204,13 +204,13 @@ int main(int argc, char** argv)
   if(aligner_mode == 0)
   {
     runBowtie(pid,(char*)BOWTIE,database,compressedfp_1,
-            compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
+            compressedfp_2,alignments,SE_mode,force_fastq_mode,aligner_args);
   }
   else if(aligner_mode == 1)
   {
     runBWA(pid,(char*)BWA,database,
        compressedfp_1,compressedfp_2,sai_1,sai_2,alignments,
-       SE_mode,fQ_mode,
+       SE_mode,force_fastq_mode,
        aligner_args, aligner_args2, aligner_args3);
   }
   else
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
     SE_mode ? strncpy(custom_string,(char*)CUSTOM_ALIGNER_SE,MAX_FILENAME_LENGTH) :
               strncpy(custom_string,(char*)CUSTOM_ALIGNER_PE,MAX_FILENAME_LENGTH);
     runCustom(pid,custom_string,database,compressedfp_1,
-              compressedfp_2,alignments,SE_mode,fQ_mode,aligner_args);
+              compressedfp_2,alignments,aligner_args);
   }
 
 

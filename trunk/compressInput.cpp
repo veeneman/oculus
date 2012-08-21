@@ -34,6 +34,8 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
   char useless_line2[MLS];
   char quality_line2[MLS];
   char lookup_seq[MLS*2];
+  int h1len;
+  int h2len;
   short int key_length;
   int id;
   pair<SET::iterator,bool> key_lookup_sh;
@@ -230,12 +232,14 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
         block_iter += (((key[0] % 128) * 256 + key[1]) + 2); //roll forward memory
 
         //since it's the first, print to file.
-        if(force_fastq_mode){ compfile1 << "@"; } else { compfile1 << ">"; }
+        //if(fQ_mode && !force_fastq_mode){ header_line1[0] = '>'; } //convert to fasta
+        if(force_fastq_mode) { compfile1 << "@"; } else { compfile1 << ">"; }
         compfile1 << count << "\n" << sequence_line1 << "\n";
         if(fQ_mode && force_fastq_mode){compfile1 << useless_line1 << "\n" << quality_line1 << "\n";}
         if(!SE_mode)
         {
-          if(force_fastq_mode){ compfile1 << "@"; } else { compfile2 << ">"; }
+          //if(fQ_mode && !force_fastq_mode){ header_line2[0] = '>'; } //convert to fasta
+          if(force_fastq_mode) { compfile2 << "@"; } else { compfile2 << ">"; }
           compfile2 << count << "\n" << sequence_line2 << "\n";
           if(fQ_mode && force_fastq_mode){compfile2 << useless_line2 << "\n" << quality_line2 << "\n";}
         }
@@ -246,30 +250,33 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
         reversed ? key_lookup_nmh.first->second.reverse++ : key_lookup_nmh.first->second.forward++;
       }
 
+      h1len = (unsigned)strlen(header_line1);
+      h2len = (unsigned)strlen(header_line2);
+      if(header_line1[h1len - 2] == '/' && header_line1[h1len - 1] == '1' &&
+          header_line2[h2len - 2] == '/' && header_line2[h2len - 1] == '2')
+      {
+        header_line1[h1len - 2] = '\0';
+        header_line2[h2len - 2] = '\0';
+      }
+
       //print name & qual to temp file
       if(SE_mode && fQ_mode)
       {
-        tmpfile << id << "\t" << header_line1 << "\t" << quality_line1 << "\n";
+        tmpfile << id << "\t" << header_line1 + 1 << "\t" << quality_line1 << "\n";
       }
       else if(SE_mode) // !fQ
       {
-        tmpfile << id << "\t" << header_line1 << "\n";
+        tmpfile << id << "\t" << header_line1 + 1 << "\n";
       }
       else if(fQ_mode) // !SE
       {
-        tmpfile << id << "\t" << header_line1 << "\t" << quality_line1
-                << "\t" << header_line2 << "\t" << quality_line2 << "\n";
+        tmpfile << id << "\t" << header_line1 + 1 << "\t" << quality_line1
+                << "\t" << header_line2 + 1 << "\t" << quality_line2 << "\n";
       }
       else //!SE & !fQ
       {
-        tmpfile << id << "\t" << header_line1 << "\t" << header_line2 << "\n";
+        tmpfile << id << "\t" << header_line1 + 1 << "\t" << header_line2 + 1 << "\n";
       }
     }
-  }
-
-  if(!force_fastq_mode)
-  // the input is no longer fastq, it has been converted to fasta
-  {
-    fQ_mode = false;
   }
 }
