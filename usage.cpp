@@ -6,7 +6,7 @@ void usage(int ret_code)
   (ret_code == 0) ? handle = stdout : handle = stderr;
 
   fprintf(handle,
-	  "Oculus version 0.1.1\n"
+	  "Oculus version 0.1.2\n"
 	  " Aligner wrapper that improves speed by\n"
 	  " aligning only a unique set of input reads.\n\n"
 	  "Usage\n\n"

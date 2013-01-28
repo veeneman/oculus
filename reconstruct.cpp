@@ -138,9 +138,9 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
         flag1 += (line1[i] - 48); // - '0'
       }
     }
-    for( ;line1[i] != 0; i++) //iterate through entire SAM line
+    for( ; ; i++) //iterate through remainder of SAM line
     {
-      if(line1[i] == '\t' || line1[i] == ' ' || line1[i] == '\n')
+      if(line1[i] == 0 || line1[i] == '\t' || line1[i] == ' ' || line1[i] == '\n')
       {
         tab_count++;
         qualend_1 = i;
@@ -191,9 +191,9 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
           flag2 += (line2[i] - 48);
         }
       }
-      for( ;line2[i] != 0; i++) //iterate through entire SAM line
+      for( ; ; i++) //iterate through entire SAM line
       {
-        if(line2[i] == '\t' || line2[i] == ' ' || line2[i] == '\n')
+        if(line2[i] == 0 || line2[i] == '\t' || line2[i] == ' ' || line2[i] == '\n')
         {
           tab_count++;
           qualend_2 = i;
