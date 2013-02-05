@@ -99,10 +99,9 @@ if($bwt && (!(-e $bwt) || !(-x $bwt) || !(-B $bwt)))
   exit(1);
 }
 
-if($gsh && (!($gsh =~ m/include\/?$/g || $gsh =~ m/src\/$/g) || !(-d $gsh)))
+if($gsh && (!($gsh =~ m/include\/?$/g || $gsh =~ m/src\/?$/g || $gsh =~ m/Sparsehash\/?$/g) || !(-d $gsh)))
 {
-  print STDERR "Error - $gsh doesn't look like the google sparse hash include/src directory.\n";
-  exit(1);
+  print STDERR "Warning - $gsh doesn't look like the google sparse hash include/src directory.\n";
 }
 
 if($custompe && (!($custompe =~ m/\@d/) ||
