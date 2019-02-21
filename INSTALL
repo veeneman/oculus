@@ -29,3 +29,17 @@ Oculus Installation How-To
    libraries.
 
 4) Run 'make'.
+
+EXAMPLE:
+bowtie="bowtie"
+git clone https://github.com/veeneman/oculus-bio.git
+cd oculus-bio
+git clone https://github.com/sparsehash/sparsehash.git
+cd sparsehash/
+mkdir build
+./configure --prefix=`pwd`/build
+make
+make install
+cd ..
+./configure.pl --bowtie $bowtie --g ./sparsehash/build/include
+make
