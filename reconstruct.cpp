@@ -6,7 +6,7 @@
 
 void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
      bool SE_mode,bool fQ_mode,
-     bool base4_mode, bool RC_mode, bool qual_mode,
+     bool base4_mode, bool RC_mode, bool qual_mode, bool count_mode,
      MAP& multi_map,NMAP& multi_nmap)
 {
   //variables
@@ -71,13 +71,13 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
       break;
     }
 
-    if(!qual_mode) { recon << line1 << "\n"; } //print a copy of the line
-
     if(line1[0] == '@') //header line
     {
       recon << line1 << "\n";
       continue;
     }
+
+    //if(!qual_mode) { recon << line1 << "\n"; } //print a copy of the line
 
     if(!SE_mode)
     {
@@ -95,7 +95,7 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
         exit(1);
       }
 
-      if(!qual_mode) { recon << line2 << "\n"; } //print a copy of the line
+      //if(!qual_mode) { recon << line2 << "\n"; } //print a copy of the line
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -343,51 +343,63 @@ void reconstruct(ifstream& alignments,ofstream& recon, ifstream& ids,
         reverse_count = (key_lookup_mh->second).first;
       }
 
-      for(i = 0; i < forward_count; i++) //print forward hash entries in same orientation
+      //not sure why forward_count is off by one, but it is
+      if(count_mode)
       {
-        recon << line1 << "\n";
-        if(!SE_mode)
-        {
-          recon << line2 << "\n";
-        }
+	recon << line1 << "\tFC:i:" << forward_count +1 << "\tRC:i:" << reverse_count << "\n";
+	if(!SE_mode)
+	{
+	  recon << line2 << "\tFC:i:" << forward_count +1<< "\tRC:i:" <<reverse_count << "\n";
+	}
       }
-      for(i = 0; i < reverse_count; i++) //and reverse hash entries in opposite orientation
+      else //regular SAM reconstitution
       {
-        // 'Opposite orientation' here is interesting - it means both with a changed flag,
-        // and in SE potentially a reversed sequence, and in PE potentially a reversed order.
-        // The issue stems from bowtie outputting reads in their original orientation if they map to nothing.
+        for(i = 0; i <= forward_count; i++) //print forward hash entries in same orientation
+        {
+          recon << line1 << "\n";
+          if(!SE_mode)
+          {
+            recon << line2 << "\n";
+          }
+        }
+        for(i = 0; i < reverse_count; i++) //and reverse hash entries in opposite orientation
+        {
+          // 'Opposite orientation' here is interesting - it means both with a changed flag,
+          // and in SE potentially a reversed sequence, and in PE potentially a reversed order.
+          // The issue stems from bowtie outputting reads in their original orientation if they map to nothing.
 
-        reverse_line[0] = 0;
+          reverse_line[0] = 0;
 
-        if(!SE_mode && (((flag1 % 8) / 4) == 1)) // surprise! - for unmapped reverse entries of PE, they should be printed in opposite order
-        //it may also be necessary to check the second flag, XXX, though this seems unlikely - i think either both map or neither do
-        {
-          strncat(reverse_line,line2,flagstart_2);
-          recon << reverse_line << rflag2 << line2 + flagend_2 << "\n";
-          reverse_line[0] = 0;
-          strncat(reverse_line,line1,flagstart_1);
-          recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
+          if(!SE_mode && (((flag1 % 8) / 4) == 1)) // surprise! - for unmapped reverse entries of PE, they should be printed in opposite order
+          //it may also be necessary to check the second flag, XXX, though this seems unlikely - i think either both map or neither do
+          {
+            strncat(reverse_line,line2,flagstart_2);
+            recon << reverse_line << rflag2 << line2 + flagend_2 << "\n";
+            reverse_line[0] = 0;
+            strncat(reverse_line,line1,flagstart_1);
+            recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
+          }
+          else if(!SE_mode) //regular old PE
+          {
+            strncat(reverse_line,line1,flagstart_1);
+            recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
+            reverse_line[0] = 0;
+            strncat(reverse_line,line2,flagstart_2);
+            recon << reverse_line << rflag2 << line2 + flagend_2 << "\n";
+          }
+          else if(((flag1 % 8) / 4) == 1) //if it's unmapped, reverse the sequence, not the flag (SE)
+          {
+            strncat(reverse_line,line1,seqstart_1);
+            reverseComplement(line1 + seqstart_1, reverse_seq, seqend_1 - seqstart_1);
+            recon << reverse_line << reverse_seq << line1 + seqend_1 << "\n";
+          }
+          else //reverse the flag (SE, and mapped)
+          {
+            strncat(reverse_line,line1,flagstart_1);
+            recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
+          }
         }
-        else if(!SE_mode) //regular old PE
-        {
-          strncat(reverse_line,line1,flagstart_1);
-          recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
-          reverse_line[0] = 0;
-          strncat(reverse_line,line2,flagstart_2);
-          recon << reverse_line << rflag2 << line2 + flagend_2 << "\n";
-        }
-        else if(((flag1 % 8) / 4) == 1) //if it's unmapped, reverse the sequence, not the flag (SE)
-        {
-          strncat(reverse_line,line1,seqstart_1);
-          reverseComplement(line1 + seqstart_1, reverse_seq, seqend_1 - seqstart_1);
-          recon << reverse_line << reverse_seq << line1 + seqend_1 << "\n";
-        }
-        else //reverse the flag (SE, and mapped)
-        {
-          strncat(reverse_line,line1,flagstart_1);
-          recon << reverse_line << rflag1 << line1 + flagend_1 << "\n";
-        }
-      }
+      } //x
     }
     else //qual mode
     {

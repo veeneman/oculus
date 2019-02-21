@@ -23,6 +23,8 @@ int main(int argc, char** argv)
   bool fQ_mode;
   int  aligner_mode     = 0; // 0 - bwt, 1 - bwa, 2 - custom
   int  compress_mode    = 0; // 0 - none, 1 - gzip, 2 - bzip2
+  long trim_left        = 0;
+  long trim_length      = 0;
   bool gzip_cfiles      = false;
   bool silent_mode      = false;
   bool base4_mode       = false;
@@ -30,6 +32,7 @@ int main(int argc, char** argv)
   bool RC_mode          = false;
   bool force_fastq_mode = false;
   bool qual_mode        = false;
+  bool count_mode       = false;
   SET single_set;
   MAP multi_map;
   NMAP nmulti_map; //used for qual retrieval
@@ -82,7 +85,8 @@ int main(int argc, char** argv)
             base4_mode,silent_mode,
             set_mode,aligner_mode,
             RC_mode, force_fastq_mode, qual_mode,
-            gzip_cfiles, compress_mode);
+            gzip_cfiles, compress_mode,
+	    trim_left, trim_length, count_mode);
 
   //generate output file paths based on user-specified output prefix
   strncat(strncat(compressedfp_1  ,outputprefix,MAX_FILENAME_LENGTH - 5),".cf1",5);
@@ -153,7 +157,8 @@ int main(int argc, char** argv)
                 RC_mode,force_fastq_mode, qual_mode,
                 single_set,multi_map,nmulti_map,
                 memory_blocks,
-                total_lines,compressed_lines);
+                total_lines,compressed_lines,
+		trim_left,trim_length);
 
   if(!silent_mode)
   {
@@ -245,7 +250,7 @@ int main(int argc, char** argv)
   ofstream reconfile(alignments_recon);
 
   reconstruct(alignfile, reconfile, ids,
-              SE_mode, fQ_mode,base4_mode, RC_mode, qual_mode,
+              SE_mode, fQ_mode, base4_mode, RC_mode, qual_mode, count_mode,
               multi_map,nmulti_map);
   
   if(!silent_mode)

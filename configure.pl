@@ -87,13 +87,13 @@ if(!$bwa && !$bwt && !$customse && !$custompe)
   exit(1);
 }
 
-if($bwa && (!(-e $bwa) || !(-x $bwa) || !(-B $bwa)))
+if($bwa && (!(-e $bwa) || !(-x $bwa) ))
 {
   print STDERR "Error - $bwa doesn't look like a valid, executable, binary. Check permissions.\n";
   exit(1);
 }
 
-if($bwt && (!(-e $bwt) || !(-x $bwt) || !(-B $bwt)))
+if($bwt && (!(-e $bwt) || !(-x $bwt) ))
 {
   print STDERR "Error - $bwt doesn't look like a valid, executable, binary. Check permissions.\n";
   exit(1);
@@ -158,7 +158,7 @@ reconstruct.o:reconstruct.cpp compress.h map.h compile_options.h cseq.o reverseC
 	\$(CC) \$(OPTS) -Wno-deprecated \$(GOOG) -c reconstruct.cpp
 
 reverseComplement.o:reverseComplement.cpp
-	\$(CC) \$(OPTS) -c reverseComplement.cpp
+	\$(CC) \$(OPTS) -Wno-narrowing -c reverseComplement.cpp
 
 cseq.o:cseq.cpp compile_options.h
 	\$(CC) \$(OPTS) -c cseq.cpp

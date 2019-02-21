@@ -14,7 +14,8 @@ void parseArgs(int argc, char** argv,
                bool& base4, bool& silent,
                bool& set_mode, int& aligner_mode,
                bool& RC_mode, bool& force_fastq_mode, bool& qual_mode,
-               bool& gzip_cfiles, int& compress_mode)
+               bool& gzip_cfiles, int& compress_mode,
+	       long& trim_left, long& trim_length, bool& count_mode)
 {
   database[0] = input1[0] = input2[0] = outputprefix[0] = 0;
 
@@ -117,6 +118,30 @@ void parseArgs(int argc, char** argv,
     {
       qual_mode = true;
     }
+    else if(strncmp(argv[i],"--count",8) == 0)
+    {
+      count_mode = true;
+    }
+    else if(strncmp(argv[i],"--trim_left",12) == 0)
+    {
+      trim_left = strtol(argv[i+1],NULL,10);
+      if(trim_left == 0)
+      {
+	cerr << "Error: trim_left must be a positive integer if specified.\n";
+	exit(1);
+      }
+      i++;
+    }
+    else if(strncmp(argv[i],"--trim_length",14) == 0)
+    {
+      trim_length = strtol(argv[i+1],NULL,10);
+      if(trim_length == 0)
+      {
+	cerr << "Error: trim_length must be a positive integer if specified.\n";
+	exit(1);
+      }
+      i++;
+    }
     else if(strncmp(argv[i],"-d",3) == 0)
     {
       if(i == (argc - 1) || argv[i+1][0] == '-')
@@ -208,6 +233,11 @@ void parseArgs(int argc, char** argv,
   if(qual_mode && RC_mode)
   {
     cerr << "Error: reverse-complement storage and quality retrieval are incompatible.\n";
+    exit(1);
+  }
+  if(qual_mode && count_mode)
+  {
+    cerr << "Error: count-based output and quality retrieval are incompatible.\n";
     exit(1);
   }
 

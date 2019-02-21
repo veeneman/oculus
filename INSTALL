@@ -11,8 +11,10 @@ Oculus Installation How-To
 2) Download and Install Google-Sparehash
    (this is technically optional, but it performs
     significantly better than the C libary hash code)
-
+   Formerly:
 	http://code.google.com/p/google-sparsehash
+   Presently:
+        https://github.com/sparsehash/sparsehash
 
    Oculus 0.1.0 was tested with google-sparsehash version 1.10.
 

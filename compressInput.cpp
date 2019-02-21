@@ -22,15 +22,18 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
                    bool RC_mode, bool force_fastq_mode, bool qual_mode,
                    SET& single_set, MAP& multi_map,NMAP& nmulti_map,
                    vector<unsigned char*>& memory_blocks,
-                   int& count, int& compressed_count)
+                   int& count, int& compressed_count,
+		   long trim_left, long trim_length)
 {
   //reusable variables
   char header_line1[MLS];
-  char sequence_line1[MLS];
+  char sequence_line1_buf[MLS];
+  char* sequence_line1;
   char useless_line1[MLS];
   char quality_line1[MLS];
   char header_line2[MLS];
-  char sequence_line2[MLS];
+  char sequence_line2_buf[MLS];
+  char* sequence_line2;
   char useless_line2[MLS];
   char quality_line2[MLS];
   char lookup_seq[MLS*2];
@@ -63,7 +66,9 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
     count++;
       
     check(readfile1); //check is a function to verify the input file stream
-    readfile1.getline(sequence_line1,MLS);
+    readfile1.getline(sequence_line1_buf,MLS);
+    sequence_line1 = sequence_line1_buf + trim_left;
+    if(trim_length != 0) { sequence_line1[trim_length] = '\0'; }
     if(fQ_mode) //4 lines
     {
       check(readfile1);
@@ -77,7 +82,9 @@ void compressInput(ifstream& readfile1, ifstream& readfile2,
       check(readfile2);
       readfile2.getline(header_line2,MLS);
       check(readfile2);
-      readfile2.getline(sequence_line2,MLS);
+      readfile2.getline(sequence_line2_buf,MLS);
+      sequence_line2 = sequence_line2_buf + trim_left;
+      if(trim_length != 0) { sequence_line2[trim_length] = '\0'; }
       if(fQ_mode)
       {
         check(readfile2);
