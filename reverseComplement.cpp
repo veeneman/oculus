@@ -1,7 +1,6 @@
-using namespace std;
-
 #include <iostream>
 #include <fstream>
+using namespace std;
 
 //this makes computing the reverse complement faster and simpler
 //I think I stole this from Bowtie - thanks!

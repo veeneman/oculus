@@ -30,9 +30,10 @@
 #include <ext/hash_set>
 #include <stdint.h>
 
-using namespace std;
+//using namespace std;       //namespaces lead to collisions now, on some systems(?)
+//using namespace __gnu_cxx; //namespaces lead to collisions now, on some systems(?)
 using __gnu_cxx::hash;
-using namespace __gnu_cxx;
+using __gnu_cxx::pair;
 
 typedef pair<unsigned char*,pair<int, int> > MAP_ENTRY;
 typedef struct { int id, forward, reverse; } triple;
